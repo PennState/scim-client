@@ -17,9 +17,8 @@ type User struct {
 	//Entitlements is a collection of entitlements
 	Entitlements []Entitlement
 
-	//@XmlElement
-	//@ScimAttribute(description="A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
-	//List<ResourceReference> groups;
+	//Groups is a list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
+	Groups []ResourceReference `json:"groups"`
 
 	//Ims are instant messaging addresses for the User.
 	Ims []Im
