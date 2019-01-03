@@ -1,5 +1,5 @@
 package cprclient
 
-type ScimExtenstion interface {
+type ScimExtension interface {
 	getUrn() string
 }
