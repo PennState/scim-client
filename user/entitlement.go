@@ -1,13 +1,12 @@
-package cprclient
+package user
 
-//Im is an instant messaging address for the user.
-type Im struct {
-
-	//Type is a label indicating the attribute's function; e.g., 'aim', 'gtalk', 'mobile' etc.
+//Entitlement may be an additional right to a thing, object, or service
+type Entitlement struct {
+	//Type is a label indicating the attribute's function.
 	Type string `json:"type"`
 
-	//Value is an instant messaging address for the User.
-	Value string
+	//Value is the value of an entitlement.
+	Value string `json:"value"`
 
 	//Display is a human readable name, primarily used for display purposes. READ-ONLY.")
 	Display string `json:"display"`

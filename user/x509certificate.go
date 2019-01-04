@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //X509Certificate DER-encoded X.509 certificate (see Section 4 of [RFC5280]), which MUST be base64 encoded per Section 4 of [RFC4648].
 type X509Certificate struct {

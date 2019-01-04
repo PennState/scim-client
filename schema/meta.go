@@ -1,4 +1,4 @@
-package cprclient
+package schema
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //Photo is the url location of the users photo
 type Photo struct {

@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //Role is a value that describes the user
 type Role struct {

@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //Address is a street and country based addess for the identity
 type Address struct {

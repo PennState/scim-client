@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //Email describes a user email address
 type Email struct {

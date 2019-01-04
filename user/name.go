@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //Name is the name of the user
 type Name struct {

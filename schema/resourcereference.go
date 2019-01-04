@@ -1,4 +1,4 @@
-package cprclient
+package schema
 
 //ResourceReference is the url reference for the ScimValue
 type ResourceReference struct {

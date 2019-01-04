@@ -1,4 +1,4 @@
-package cprclient
+package user
 
 //PhoneNumber is a number for the user.
 //The value SHOULD be specified according to the format defined in [RFC3966], e.g., 'tel:+1-201-555-0123'.  Service providers SHOULD canonicalize the value according to [RFC3966] format, when appropriate.
