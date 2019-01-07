@@ -1,7 +1,10 @@
 package scim
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/PennState/golang_scimclient/schema"
 )
 
 //ScimResource describes the base common attributes of all Scim Resources
@@ -55,4 +58,17 @@ type StringMultivalued struct {
 
 	//The attribute's significant value, e.g., email address, phone	number.
 	Value string `json:"value"`
+}
+
+func Unmarshal(data []byte, resource *ScimResource, extensions ...schema.ScimExtension) error {
+	var error error
+
+	error = json.Unmarshal(data, resource)
+
+	if error == nil && len(extensions) > 0 {
+		//var attributes map[string]interface{}
+
+	}
+
+	return error
 }
