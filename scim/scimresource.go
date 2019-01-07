@@ -1,4 +1,4 @@
-package resource
+package scim
 
 import (
 	"github.com/PennState/golang_scimclient/schema"
