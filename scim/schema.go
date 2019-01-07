@@ -1,5 +1,6 @@
 package scim
 
+//https://tools.ietf.org/html/rfc7643#section-7
 type Schema struct {
 	Id string `json:"id"`
 	Name string `json:"name"`
@@ -7,20 +8,19 @@ type Schema struct {
 	Attributes []Attribute `json:"attributes"`
 }
 
-//https://tools.ietf.org/html/rfc7643#section-2.4
 type Attribute struct {
-	Name string
-	Type Type
-	Subattributes []Attribute
-	Multivalued bool
-	Description string
-	Required bool
-	CanonicalValues []string
-	CaseExact bool
-	Mutability Mutability
-	Returned Returned
-	Uniqueness Uniqueness
-	ReferenceTypes []string
+	Name string `json:"name"`
+	Type Type `json:"type"`
+	SubAttributes []Attribute `json:"subAttributes"`
+	Multivalued bool `json:"multiValued"`
+	Description string `json:"description"`
+	Required bool `json:"required"`
+	CanonicalValues []string `json:"canonicalValues"`
+	CaseExact bool `json:"caseExact"`
+	Mutability Mutability `json:"mutability"`
+	Returned Returned `json:"returned"`
+	Uniqueness Uniqueness `json:"uniqueness"`
+	ReferenceTypes []string `json:"referenceTypes"`
 }
 
 type Type = string
