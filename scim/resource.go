@@ -33,14 +33,11 @@ type Meta struct {
 	Version  string `json:"version"`
 }
 
-
 //Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
 //https://tools.ietf.org/html/rfc7643#section-2.4
 type Multivalued struct {
 	//Type is a label indicating the attribute's function; e.g., 'work' or 'home'.
 	Type string `json:"type"`
-
-	Value string `json:"value"`
 
 	//Display is a  human readable name, primarily used for display purposes. READ-ONLY.
 	Display string `json:"display"`
