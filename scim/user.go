@@ -1,14 +1,9 @@
-package user
-
-import (
-	"github.com/PennState/golang_scimclient/scim"
-	"github.com/PennState/golang_scimclient/schema"
-)
+package scim
 
 //User describes a SCIM user based on the RFC7643 specification
 type User struct {
 
-	scim.ScimResource
+	ScimResource
 
 	//Active informs as to whether this User record is currently live in the system
 	Active bool `json:"active"`
@@ -26,7 +21,7 @@ type User struct {
 	Entitlements []Entitlement
 
 	//Groups is a list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
-	Groups []schema.ResourceReference `json:"groups"`
+	Groups []Group `json:"groups"`
 
 	//Ims are instant messaging addresses for the User.
 	Ims []Im
@@ -74,3 +69,57 @@ type User struct {
 	//X509Certificates is list of certificates issued to the User.
 	X509Certificates []X509Certificate
 }
+
+//Address is a street and country based addess for the identity
+type Address struct {
+	Multivalued
+
+	//Country is the contry location of the address
+	Country string `json:"country"`
+
+	// Formatted is the full mailing address, formatted for display or use with a mailing label. This attribute MAY contain newlines.")
+	Formatted string `json:"formatted"`
+
+	//Locality is the city or locality component.
+	Locality string `json:"locality"`
+
+	//PostalCode is the zipcode or postal code component.
+	PostalCode string
+
+	//Region is the state or region component.
+	Region string
+
+	//StreetAddress is the full street address component, which may include house number, street name, PO BOX, and multi-line extended street address information. This attribute MAY contain newlines.")
+	StreetAddress string
+}
+
+type Email = StringMultivalued
+type Entitlement = StringMultivalued
+type Group = StringMultivalued
+type Im = StringMultivalued
+
+//Name is the name of the user
+type Name struct {
+	//Formatted is the full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g. Ms. Barbara J Jensen, III.)
+	Formatted string `json:"formatted"`
+
+	//FamilyName is the family name of the User, or Last Name in most Western languages (e.g. Jensen given the full name Ms. Barbara J Jensen, III.)
+	FamilyName string `json:"familyName"`
+
+	//GiveName is the given name of the User, or First Name in most Western languages (e.g. Barbara given the full name Ms. Barbara J Jensen, III.)
+	GivenName string `json:"givenName"`
+
+	//MiddleName is the middle name(s) of the User (e.g. Robert given the full name Ms. Barbara J Jensen, III.).
+	MiddleName string `json:"middleName"`
+
+	//HonorificPrevix is the honorific prefix(es) of the User, or Title in most Western languages (e.g. Ms. given the full name Ms. Barbara J Jensen, III.)
+	HonorificPrefix string `json:"honorificPrefix"`
+
+	//HonorificSuffix is the honorific suffix(es) of the User, or Suffix in most Western languages (e.g. III. given the full name Ms. Barbara J Jensen, III.)
+	HonorificSuffix string `json:"honorificSuffix"`
+}
+
+type PhoneNumber = StringMultivalued
+type Photo = StringMultivalued
+type Role = StringMultivalued
+type X509Certificate = StringMultivalued
