@@ -1,14 +1,14 @@
 package user
 
 import (
-	"github.com/PennState/golang_scimclient/resource"
+	"github.com/PennState/golang_scimclient/scim"
 	"github.com/PennState/golang_scimclient/schema"
 )
 
 //User describes a SCIM user based on the RFC7643 specification
 type User struct {
 
-	resource.ScimResource
+	scim.ScimResource
 
 	//Active informs as to whether this User record is currently live in the system
 	Active bool `json:"active"`
