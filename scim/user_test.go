@@ -3,10 +3,14 @@ package scim
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // https://tools.ietf.org/html/rfc7643#section-8.1
 func TestMinimalUserUnmarshaling(t *testing.T) {
+	assert := assert.New(t)
+
 	const minimalUser = `
 		{
 		"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
@@ -24,17 +28,14 @@ func TestMinimalUserUnmarshaling(t *testing.T) {
 	var user User
 	error := json.Unmarshal([]byte(minimalUser), &user)
 
-	if error != nil {
-		t.Errorf("Unmarshal error!")
-	}
-
-	if user.ID != "2819c223-7f76-453a-919d-413861904646" {
-		t.Errorf("Error!")
-	}
+	assert.Nil(error, "Error unmarshaling the User object - %q", error)
+	assert.Equal(user.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
 }
 
 // https://tools.ietf.org/html/rfc7643#section-8.2
 func TestFullUserUnmarshaling(t *testing.T) {
+	assert := assert.New(t)
+
 	const fullUser = `
 	{
 		"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
@@ -151,17 +152,14 @@ func TestFullUserUnmarshaling(t *testing.T) {
 	var user User
 	error := json.Unmarshal([]byte(fullUser), &user)
 
-	if error != nil {
-		t.Errorf("Unmarshal error! %q", error)
-	}
-
-	if user.ID != "2819c223-7f76-453a-919d-413861904646" {
-		t.Errorf("Error!")
-	}
+	assert.Nil(error, "Error unmarshaling the User object - %q", error)
+	assert.Equal(user.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
 }
 
 // https://tools.ietf.org/html/rfc7643#section-8.2
 func TestEnterpriseUserUnmarshaling(t *testing.T) {
+	assert := assert.New(t)
+
 	const fullUser = `
 	{
 		"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
@@ -290,15 +288,7 @@ func TestEnterpriseUserUnmarshaling(t *testing.T) {
 	var user User
 	error := json.Unmarshal([]byte(fullUser), &user)
 
-	if error != nil {
-		t.Errorf("Unmarshal error! %q", error)
-	}
-
-	if user.ID != "2819c223-7f76-453a-919d-413861904646" {
-		t.Errorf("Error!")
-	}
-
-	if user.ScimExtensions == nil {
-		t.Errorf("Error! There should be a SCIM extension")
-	}
+	assert.Nil(error, "Error unmarshaling the User object - %q", error)
+	assert.Equal(user.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
+	assert.Len(user.ScimExtensions, 1, "Error! There should be a SCIM extension")
 }
