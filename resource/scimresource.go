@@ -15,7 +15,7 @@ type ScimResource struct {
 	// (XmlElementAny?)
 	//  private Map<String, ScimExtension> extensions = new HashMap<String, ScimExtension>();
 
-	ScimExtensions []interface{} `json:"extensions"`
+	ScimExtensions []interface{}
 
 	// private String baseUrn;
 
