@@ -1,13 +1,13 @@
 package scim
 
 import (
-	"github.com/PennState/golang_scimclient/schema"
+	"time"
 )
 
 //ScimResource describes the base common attributes of all Scim Resources
 //https://tools.ietf.org/html/rfc7643#section-3.1
 type ScimResource struct {
-	Meta schema.Meta `json:"meta"`
+	Meta Meta `json:"meta"`
 
 	ID string `json:"id"`
 
@@ -23,7 +23,18 @@ type ScimResource struct {
 
 }
 
-//Multi-valued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
+//Meta is a complex attribute containing resource metadata.
+type Meta struct {
+	ResourceType string    `json:"resourceType"`
+	Created      time.Time `json:"created,string"`
+	LastModified time.Time `json:"lastModified,string"`
+
+	Location string `json:"location"`
+	Version  string `json:"version"`
+}
+
+
+//Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
 //https://tools.ietf.org/html/rfc7643#section-2.4
 type Multivalued struct {
 	//Type is a label indicating the attribute's function; e.g., 'work' or 'home'.
@@ -41,10 +52,10 @@ type Multivalued struct {
 	Reference string `json:"$ref"`
 }
 
+//Provides a base structure for simple string multi-valued attributes.
 type StringMultivalued struct {
 	Multivalued
 
 	//The attribute's significant value, e.g., email address, phone	number.
 	Value string `json:"value"`
 }
-
