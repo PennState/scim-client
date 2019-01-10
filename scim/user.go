@@ -3,7 +3,7 @@ package scim
 //User describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.1
 type User struct {
-	ScimResource
+	CommonResource
 
 	//Active informs as to whether this User record is currently live in the system
 	Active bool `json:"active"`
@@ -24,7 +24,7 @@ type User struct {
 	Groups []Group `json:"groups"`
 
 	//Ims are instant messaging addresses for the User.
-	Ims []Im `json:"ims"`
+	IMs []IM `json:"ims"`
 
 	//Locale is used to indicate the User's default location for purposes of localizing items such as currency, date time format, numerical representations, etc.
 	Locale string `json:"locale"`
@@ -36,8 +36,8 @@ type User struct {
 	NickName string `json:"nickName"`
 
 	//Password is the User's clear text password.  This attribute is intended to be used as a means to specify an initial password when creating a new User or to reset an existing User's password.
-	//(This is a placeholder in case I implement the server in golang)
-	Password string `json:"_,omitempty"`
+	//TODO - (This is a placeholder in case I implement the server in golang)
+	Password string `json:"password,omitempty"`
 
 	//PhoneNumberrs are the phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g. 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile, fax, pager and other.")
 	PhoneNumbers []PhoneNumber `json:"phoneNumbers"`
@@ -51,7 +51,7 @@ type User struct {
 	//PreferredLanguage indicates the User's preferred written or spoken language.  Generally used for selecting a localized User interface. e.g., 'en_US' specifies the language English and country US.
 	PreferredLanguage string `json:"preferredLanguage"`
 
-	//Rols are a list of roles for the User that collectively represent who the User is; e.g., 'Student', 'Faculty'.
+	//Roles are a list of roles for the User that collectively represent who the User is; e.g., 'Student', 'Faculty'.
 	Roles []Role `json:"roles"`
 
 	//Timezone is the User's time zone in the 'Olson' timezone database format; e.g.,'America/Los_Angeles'
@@ -77,7 +77,7 @@ type Address struct {
 	//Country is the contry location of the address
 	Country string `json:"country"`
 
-	// Formatted is the full mailing address, formatted for display or use with a mailing label. This attribute MAY contain newlines.")
+	//Formatted is the full mailing address, formatted for display or use with a mailing label. This attribute MAY contain newlines.")
 	Formatted string `json:"formatted"`
 
 	//Locality is the city or locality component.
@@ -93,10 +93,17 @@ type Address struct {
 	StreetAddress string `json:"streetAddress"`
 }
 
+//Email provides an email address in the StringMultivalued.Value field.
 type Email = StringMultivalued
+
+//Entitlement provides an entitlement name in the StringMultivalued.Value field.
 type Entitlement = StringMultivalued
+
+//Group indicates membership in a scim.Group by providing a reference as well as a small amount of cargo data to the group.
 type Group = StringMultivalued
-type Im = StringMultivalued
+
+//IM provides an instant message address in the StringMultivalued.Value field.
+type IM = StringMultivalued
 
 //Name is the name of the user
 type Name struct {
@@ -119,7 +126,14 @@ type Name struct {
 	HonorificSuffix string `json:"honorificSuffix"`
 }
 
+//PhoneNumber provides an RFC3966 compliant phone number in the StringMultivalued.Value field.
 type PhoneNumber = StringMultivalued
+
+//Photo provides a link to a user's photograph in the StringMultivalued.Value field.
 type Photo = StringMultivalued
+
+//Role provides an identifier for a role in the StringMultivalued.Value field.
 type Role = StringMultivalued
+
+//X509Certificate provides a DER-encoded X.509 certificate in the StringMultivalued.Value field.
 type X509Certificate = StringMultivalued
