@@ -154,12 +154,14 @@ func Unmarshal(data []byte, resource resource) error {
 	err = json.Unmarshal(data, resource)
 
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	var additionalProperties map[string]json.RawMessage
 	err = json.Unmarshal(data, &additionalProperties)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -172,7 +174,7 @@ func Unmarshal(data []byte, resource resource) error {
 
 func jsonName(sf reflect.StructField) string {
 	t := sf.Tag.Get("json")
-	log.Infof("Tag: %s", t)
+	log.Debugf("Tag: %s", t)
 
 	if t != "" {
 		if idx := strings.Index(t, ","); idx != -1 {
@@ -189,10 +191,10 @@ func removeKnownProperties(additionalProperties map[string]json.RawMessage, t re
 		f := t.Field(i)
 		n := jsonName(f)
 		if strings.HasSuffix(f.Type.Name(), n) && f.Type.Kind() == reflect.Struct {
-			log.Infof("Recursing into: %s", n)
+			log.Debugf("Recursing into: %s", n)
 			removeKnownProperties(additionalProperties, f.Type)
 		} else {
-			log.Infof("Name: %s, Type: %s, Kind: %s", n, f.Type, f.Type.Kind())
+			log.Debugf("Name: %s, Type: %s, Kind: %s", n, f.Type, f.Type.Kind())
 			delete(additionalProperties, n)
 		}
 	}
