@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const commonResourceJSON = `
+const resourceJSON = `
 {
 	"id": "2819c223-7f76-453a-919d-413861904646",
 	"externalId": "43496746-7739-460b-bf99-3421f2970687",
@@ -23,7 +23,7 @@ const commonResourceJSON = `
 	}
 }`
 
-const commonResourceWithAdditionalPropertiesJSON = `
+const resourceWithAdditionalPropertiesJSON = `
 {
 	"id": "2819c223-7f76-453a-919d-413861904646",
 	"externalId": "43496746-7739-460b-bf99-3421f2970687",
@@ -163,18 +163,18 @@ func TestUpdateExtension(t *testing.T) {
 //
 //
 
-func CommonResourceMarshaling(t *testing.T) {
+func ResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	var commonResource = Resource{ID: "2819c223-7f76-453a-919d-413861904646"}
+	var Resource = Resource{ID: "2819c223-7f76-453a-919d-413861904646"}
 
-	b, err := json.Marshal(commonResource)
+	b, err := json.Marshal(Resource)
 
 	if err != nil {
 
 	}
 
-	expected := json.RawMessage(commonResourceJSON)
+	expected := json.RawMessage(resourceJSON)
 	actual := json.RawMessage(b)
 	assert.Equal(actual, expected)
 }
@@ -185,27 +185,27 @@ func CommonResourceMarshaling(t *testing.T) {
 //
 //
 
-func TestCommonResourceUnmarshaling(t *testing.T) {
+func TestResourceUnmarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	var commonResource Resource
-	error := Unmarshal([]byte(commonResourceJSON), &commonResource)
+	var resource Resource
+	error := Unmarshal([]byte(resourceJSON), &resource)
 
 	assert.Nil(error, "Error unmarshaling the User object - %q", error)
-	assert.Equal(commonResource.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
-	assert.Equal(commonResource.ExternalID, "43496746-7739-460b-bf99-3421f2970687")
+	assert.Equal(resource.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
+	assert.Equal(resource.ExternalID, "43496746-7739-460b-bf99-3421f2970687")
 
-	assert.Equal(commonResource.Meta.ResourceType, "User")
-	assert.Equal(commonResource.Meta.Created, time.Date(2010, time.January, 23, 4, 56, 22, 0, time.UTC))
-	assert.Equal(commonResource.Meta.LastModified, time.Date(2011, time.May, 13, 4, 42, 34, 0, time.UTC))
-	assert.Equal(commonResource.Meta.Version, "W/3694e05e9dff590")
-	assert.Equal(commonResource.Meta.Location, "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646")
+	assert.Equal(resource.Meta.ResourceType, "User")
+	assert.Equal(resource.Meta.Created, time.Date(2010, time.January, 23, 4, 56, 22, 0, time.UTC))
+	assert.Equal(resource.Meta.LastModified, time.Date(2011, time.May, 13, 4, 42, 34, 0, time.UTC))
+	assert.Equal(resource.Meta.Version, "W/3694e05e9dff590")
+	assert.Equal(resource.Meta.Location, "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646")
 }
 
-func TestBadCommonResourceUnmarshaling(t *testing.T) {
+func TestBadResourceUnmarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	const badCommonResourceJSON = `
+	const badResourceJSON = `
 	{
 		"id": [
 			"2819c223-7f76-453a-919d-413861904646"
@@ -222,7 +222,7 @@ func TestBadCommonResourceUnmarshaling(t *testing.T) {
 		}
 	}`
 
-	var badCommonResource Resource
-	error := Unmarshal([]byte(badCommonResourceJSON), &badCommonResource)
+	var badResource Resource
+	error := Unmarshal([]byte(badResourceJSON), &badResource)
 	assert.NotNil(error)
 }

@@ -55,35 +55,35 @@ type StringMultivalued struct {
 	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	number.
 }
 
-func (cr *Resource) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
-	cr.additionalProperties = additionalProperties
+func (r *Resource) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
+	r.additionalProperties = additionalProperties
 }
 
 //AddExtension adds a new SCIM extension to a SCIM resource.  This method is
 //purposely designed to return an error if the provided extension's URN is
 //already a key in the additionalProperties map.
-func (cr *Resource) AddExtension(extension Extension) error {
-	if cr.HasExtension(extension) {
+func (r *Resource) AddExtension(extension Extension) error {
+	if r.HasExtension(extension) {
 		return errors.New("Extension to be added already exists in resource - use UpdateExtension() instead")
 	}
-	err := cr.putExtension(extension)
+	err := r.putExtension(extension)
 	return err
 }
 
 //GetExtension retrieves a SCIM Extension from the additionalProperties map
 //by the Extension's URN.
-func (cr *Resource) GetExtension(extension Extension) error {
+func (r *Resource) GetExtension(extension Extension) error {
 	name := extension.GetURN()
-	err := json.Unmarshal(cr.additionalProperties[name], extension)
+	err := json.Unmarshal(r.additionalProperties[name], extension)
 	return err
 }
 
 //GetExtensionURNs returns a list of the keys in the additionalProperties
 //map that start with "urn:".  Clearly this is not a perfect way to
 //guarantee that the RawMessage stored in that key is an extension.
-func (cr *Resource) GetExtensionURNs() []string {
-	keys := make([]string, 0, len(cr.additionalProperties))
-	for key := range cr.additionalProperties {
+func (r *Resource) GetExtensionURNs() []string {
+	keys := make([]string, 0, len(r.additionalProperties))
+	for key := range r.additionalProperties {
 		if strings.HasPrefix(key, "urn:") {
 			keys = append(keys, key)
 		}
@@ -93,26 +93,26 @@ func (cr *Resource) GetExtensionURNs() []string {
 
 //HasExtension indicates whether the URN included with the passed
 //Extension is a key in the additionalProperties map.
-func (cr *Resource) HasExtension(extension Extension) bool {
+func (r *Resource) HasExtension(extension Extension) bool {
 	urn := extension.GetURN()
-	return cr.HasExtensionByURN(urn)
+	return r.HasExtensionByURN(urn)
 }
 
 //HasExtensionByURN indicates whether the passed URN string is a key in
 //the additionalProperties map.
-func (cr *Resource) HasExtensionByURN(urn string) bool {
-	_, exists := cr.additionalProperties[urn]
+func (r *Resource) HasExtensionByURN(urn string) bool {
+	_, exists := r.additionalProperties[urn]
 	return exists
 }
 
-func (cr *Resource) putExtension(extension Extension) error {
+func (r *Resource) putExtension(extension Extension) error {
 	urn := extension.GetURN()
 	var err error
 	var rawMessage json.RawMessage
 	rawMessage, err = json.Marshal(extension)
 
 	if err == nil {
-		cr.additionalProperties[urn] = rawMessage
+		r.additionalProperties[urn] = rawMessage
 	}
 
 	return nil
@@ -120,24 +120,24 @@ func (cr *Resource) putExtension(extension Extension) error {
 
 //RemoveExtension deletes the RawMessage with the URN included with the
 //passed SCIM Extension from the additionalProperties map.
-func (cr *Resource) RemoveExtension(extension Extension) {
-	cr.RemoveExtensionByURN(extension.GetURN())
+func (r *Resource) RemoveExtension(extension Extension) {
+	r.RemoveExtensionByURN(extension.GetURN())
 }
 
 //RemoveExtensionByURN deletes the RawMessage with the key matching
 //the passed URN from the additionalProperties map.
-func (cr *Resource) RemoveExtensionByURN(urn string) {
-	delete(cr.additionalProperties, urn)
+func (r *Resource) RemoveExtensionByURN(urn string) {
+	delete(r.additionalProperties, urn)
 }
 
 //UpdateExtension changes an existing SCIM extension already stored in a SCIM
 //resource.  This method is purposely designed to return an error if the
 //provided extension's URN is not a key in the additionalProperties map.
-func (cr *Resource) UpdateExtension(extension Extension) error {
-	if !cr.HasExtension(extension) {
+func (r *Resource) UpdateExtension(extension Extension) error {
+	if !r.HasExtension(extension) {
 		return errors.New("Extension to be updated does not exist in resource - use AddExtension() instead")
 	}
-	err := cr.putExtension(extension)
+	err := r.putExtension(extension)
 	return err
 }
 
