@@ -26,7 +26,6 @@ const organizationJSON = `
 		"version": "W/3694e05e9dff590",
 		"location": "https://example.com/v2/Organizations/430beb5c-a361-4c04-b308-2845789a496e"
 	}
-
 }`
 
 func TestOrganizationUnmarshaling(t *testing.T) {
