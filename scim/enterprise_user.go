@@ -32,6 +32,6 @@ type Manager struct {
 	DisplayName string `json:"displayName"`
 }
 
-func (eu EnterpriseUser) GetUrn() string {
+func (eu EnterpriseUser) GetURN() string {
 	return "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
 }

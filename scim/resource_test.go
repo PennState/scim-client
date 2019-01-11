@@ -45,14 +45,14 @@ type fakeExtension struct {
 	URN string `json:"urn"`
 }
 
-func (fe fakeExtension) GetUrn() string {
+func (fe fakeExtension) GetURN() string {
 	return "urn:fake.extension"
 }
 
 type worthlessExtension struct {
 }
 
-func (we worthlessExtension) GetUrn() string {
+func (we worthlessExtension) GetURN() string {
 	return "urn:worthless.extension"
 }
 

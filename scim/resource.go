@@ -37,7 +37,7 @@ type Meta struct {
 //Extension is the SCIM method for adapting and extending Resources
 //https://tools.ietf.org/html/rfc7643#section-3.3
 type Extension interface {
-	GetUrn() string
+	GetURN() string
 }
 
 //Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
@@ -73,7 +73,7 @@ func (cr *Resource) AddExtension(extension Extension) error {
 //GetExtension retrieves a SCIM Extension from the additionalProperties map
 //by the Extension's URN.
 func (cr *Resource) GetExtension(extension Extension) error {
-	name := extension.GetUrn()
+	name := extension.GetURN()
 	err := json.Unmarshal(cr.additionalProperties[name], extension)
 	return err
 }
@@ -94,7 +94,7 @@ func (cr *Resource) GetExtensionURNs() []string {
 //HasExtension indicates whether the URN included with the passed
 //Extension is a key in the additionalProperties map.
 func (cr *Resource) HasExtension(extension Extension) bool {
-	urn := extension.GetUrn()
+	urn := extension.GetURN()
 	return cr.HasExtensionByURN(urn)
 }
 
@@ -106,7 +106,7 @@ func (cr *Resource) HasExtensionByURN(urn string) bool {
 }
 
 func (cr *Resource) putExtension(extension Extension) error {
-	urn := extension.GetUrn()
+	urn := extension.GetURN()
 	var err error
 	var rawMessage json.RawMessage
 	rawMessage, err = json.Marshal(extension)
@@ -121,7 +121,7 @@ func (cr *Resource) putExtension(extension Extension) error {
 //RemoveExtension deletes the RawMessage with the URN included with the
 //passed SCIM Extension from the additionalProperties map.
 func (cr *Resource) RemoveExtension(extension Extension) {
-	cr.RemoveExtensionByURN(extension.GetUrn())
+	cr.RemoveExtensionByURN(extension.GetURN())
 }
 
 //RemoveExtensionByURN deletes the RawMessage with the key matching
