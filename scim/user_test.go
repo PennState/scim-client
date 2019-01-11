@@ -1,7 +1,6 @@
 package scim
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -27,7 +26,7 @@ func TestMinimalUserUnmarshaling(t *testing.T) {
 	}`
 
 	var user User
-	error := json.Unmarshal([]byte(minimalUser), &user)
+	error := Unmarshal([]byte(minimalUser), &user)
 
 	assert.Nil(error, "Error unmarshaling the User object - %q", error)
 	assert.Equal(user.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
@@ -158,7 +157,7 @@ func TestFullUserUnmarshaling(t *testing.T) {
 	}`
 
 	var user User
-	error := json.Unmarshal([]byte(fullUser), &user)
+	error := Unmarshal([]byte(fullUser), &user)
 
 	assert.Nil(error, "Error unmarshaling the User object - %q", error)
 	assert.Equal(user.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
