@@ -51,13 +51,13 @@ Once a SCIM client has been created, retrieving a SCIM resource can be easily
 accomplished as shown in the following code example:
 
 ```go
-func changeManager(scimClient scim.Client, employeeID string, managerID string) error {
-    e, e_err := scimClient.Get("User", employeeID) // [1]
+func changeManager(client scim.Client, employeeID string, managerID string) error {
+    e, e_err := client.Get("User", employeeID) // [1]
     if e_err != nil {
         return e_err
     }
 
-    m, m_err := scimClient.Get("User", managerID) // [1]
+    m, m_err := client.Get("User", managerID) // [1]
     if m_err != nil {
         return m_err
     }
@@ -75,7 +75,7 @@ func changeManager(scimClient scim.Client, employeeID string, managerID string) 
     eu.Manager = manager
     err = e.UpdateExtension(&enterpriseUser) // [3]
 
-    return scimClient.Update("User", e) // [4]
+    return client.Update("User", e) // [4]
 }
 ```
 
