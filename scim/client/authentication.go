@@ -1,27 +1,26 @@
 package client
 
-import "net/url"
+import (
+	"net/http"
+	"os"
 
-type Authenticator interface {
-	getAuthenticationHeader()
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
+)
+
+func GetOauth2AuthenticatedHTTPClient(tokenURL string, clientID string, clientSecret string) *http.Client {
+	var ccc clientcredentials.Config
+	ccc.TokenURL = tokenURL
+	ccc.ClientID = clientID
+	ccc.ClientSecret = clientSecret
+
+	return ccc.Client(oauth2.NoContext)
 }
 
-type OAuth2Authenticator struct {
-	Server       url.URL
-	ClientID     string
-	ClientSecret string
-}
-
-func NewOAuth2Authenticator(server string, clientID string, clientSecret string) (*OAuth2Authenticator, error) {
-	_, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	var oauth2Authenticator OAuth2Authenticator
-	//oauth2Authenticator.Server
-	oauth2Authenticator.ClientID = clientID
-	oauth2Authenticator.ClientSecret = clientSecret
-
-	return &oauth2Authenticator, nil
+func GetOauth2AuthenticatedHTTPClientFromEnvironment() *http.Client {
+	return GetOauth2AuthenticatedHTTPClient(
+		os.Getenv(`OAUTH_SERVICE_URL`),
+		os.Getenv(`OAUTH_CLIENT_ID`),
+		os.Getenv(`OAUTH_CLIENT_SECRET`),
+	)
 }
