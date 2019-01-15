@@ -199,3 +199,59 @@ func removeKnownProperties(additionalProperties map[string]json.RawMessage, t re
 		}
 	}
 }
+
+//
+//
+// TODO - The code below this line is a temporary fix for a bug in SCIMple
+//        that renders a LocalDateTime to JSON without the trailing Z (or
+//        presumbably TZ).  Remove this code when SCIMple is fixed.
+//
+//
+
+//UnmarshalJSON turns the meta string values on the wire into the correct types
+func (m *Meta) UnmarshalJSON(j []byte) error {
+	var rawStrings map[string]string
+
+	err := json.Unmarshal(j, &rawStrings)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range rawStrings {
+		key := strings.ToLower(k)
+		if key == "resourcetype" {
+			m.ResourceType = v
+		} else if key == "created" {
+			value := fixTimeZone(v)
+			t, err := time.Parse(time.RFC3339, value)
+
+			if err != nil {
+				log.Warnf("Unable to parse \"created\" %s", v)
+				return err
+			}
+			m.Created = t
+		} else if key == "lastmodified" {
+			value := fixTimeZone(v)
+			t, err := time.Parse(time.RFC3339, value)
+
+			if err != nil {
+				log.Warnf("Unable to parse \"lastModified\" %s", v)
+				return err
+			}
+			m.LastModified = t
+		} else if key == "location" {
+			m.Location = v
+		} else if key == "version" {
+			m.Version = v
+		}
+	}
+	return nil
+}
+
+func fixTimeZone(in string) string {
+	if strings.HasSuffix(in, "Z") {
+		return in
+	}
+
+	return in + "Z"
+}
