@@ -39,16 +39,16 @@ type Address struct {
 }
 
 //Email provides an email address in the StringMultivalued.Value field.
-type Email = StringMultivalued
+type Email StringMultivalued
 
 //Entitlement provides an entitlement name in the StringMultivalued.Value field.
-type Entitlement = StringMultivalued
+type Entitlement StringMultivalued
 
 //Group indicates membership in a scim.Group by providing a reference as well as a small amount of cargo data to the group.
-type Group = StringMultivalued
+type Group StringMultivalued
 
 //IM provides an instant message address in the StringMultivalued.Value field.
-type IM = StringMultivalued
+type IM StringMultivalued
 
 //Name is the name of the user
 type Name struct {
@@ -61,13 +61,13 @@ type Name struct {
 }
 
 //PhoneNumber provides an RFC3966 compliant phone number in the StringMultivalued.Value field.
-type PhoneNumber = StringMultivalued
+type PhoneNumber StringMultivalued
 
 //Photo provides a link to a user's photograph in the StringMultivalued.Value field.
-type Photo = StringMultivalued
+type Photo StringMultivalued
 
 //Role provides an identifier for a role in the StringMultivalued.Value field.
-type Role = StringMultivalued
+type Role StringMultivalued
 
 //X509Certificate provides a DER-encoded X.509 certificate in the StringMultivalued.Value field.
-type X509Certificate = StringMultivalued
+type X509Certificate StringMultivalued
