@@ -9,7 +9,7 @@ type User struct {
 	DisplayName       string            `json:"displayName"`        //DisplayName is the name of the User, suitable for display to end-users. The name SHOULD be the full name of the User being described if known
 	Emails            []Email           `json:"emails"`             //Emails are E-mail addresses for the user. The value SHOULD be canonicalized by the Service Provider, e.g. bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.
 	Entitlements      []Entitlement     `json:"entitlements"`       //Entitlements is a collection of entitlements
-	Groups            []Group           `json:"groups"`             //Groups is a list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
+	Groups            []GroupRef        `json:"groups"`             //Groups is a list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
 	IMs               []IM              `json:"ims"`                //Ims are instant messaging addresses for the User.
 	Locale            string            `json:"locale"`             //Locale is used to indicate the User's default location for purposes of localizing items such as currency, date time format, numerical representations, etc.
 	Name              Name              `json:"name"`               //Name is the components of the user's real name. Providers MAY return just the full name as a single string in the formatted sub-attribute, or they MAY return just the individual component attributes using the other sub-attributes, or they MAY return both. If both variants are returned, they SHOULD be describing the same name, with the formatted name indicating how the component attributes should be combined.
@@ -44,8 +44,8 @@ type Email StringMultivalued
 //Entitlement provides an entitlement name in the StringMultivalued.Value field.
 type Entitlement StringMultivalued
 
-//Group indicates membership in a scim.Group by providing a reference as well as a small amount of cargo data to the group.
-type Group StringMultivalued
+//GroupRef indicates membership in a scim.Group by providing a reference as well as a small amount of cargo data to the group.
+type GroupRef StringMultivalued
 
 //IM provides an instant message address in the StringMultivalued.Value field.
 type IM StringMultivalued
