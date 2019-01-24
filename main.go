@@ -24,10 +24,41 @@ func main() {
 	scimClient, err := client.New("https://dev.apps.psu.edu/cpr/resources", httpClient)
 
 	var user scim.User
-	err = scimClient.Get("/Users/9991533", &user)
+	//TODO: err = scimClient.Get("/Users/9991533", &user)
 	if err != nil {
 		log.Error(err)
 	}
 
-	log.Infof("User: %s", user)
+	log.Infof("User: %v", user)
+
+	var resourceTypes []scim.ResourceType
+	resourceTypes, err = scimClient.GetResourceTypes()
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Infof("ResourceTypes(s) %v", resourceTypes)
+
+	var schemas []scim.Schema
+	schemas, err = scimClient.GetSchemas()
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Infof("Schema(s): %v", schemas)
+
+	var cfg scim.ServiceProviderConfig
+	cfg, err = scimClient.GetServerProviderConfig()
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Infof("ServiceProviderConfig: %v", cfg)
+}
+
+func search() {
+	searchRequest := scim.NewSearchRequest()
+	searchRequest.SortOrder = scim.Ascending
+	searchRequest.SortOrder = "something else"
+	searchRequest.Attributes = []string{"one", "two"}
 }
