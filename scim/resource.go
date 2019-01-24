@@ -10,14 +10,35 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ServiceDiscoveryResource interface {
+	ServiceDiscoveryResourceType() resourceType
+	NewServiceDiscoveryResource() ServiceDiscoveryResource
+}
+
+type Resource interface {
+	//	NewResource() Resource
+	ResourceType() resourceType
+	//	ResourceURN() string
+}
+
+//Extension is the SCIM method for adapting and extending Resources
+//https://tools.ietf.org/html/rfc7643#section-3.3
+type Extension interface {
+	ExtensionURN() string
+}
+
+type ServiceProviderConfigResource interface {
+	GetServiceProviderConfigResourceURN() string
+}
+
 //https://tools.ietf.org/html/rfc7643#section-3
 type resource interface {
 	addAdditionalProperties(additionalProperties map[string]json.RawMessage)
 }
 
-//Resource describes the base common attributes of all Scim Resources
+//CommonAttributes describes the base common attributes of all Scim Resources
 //https://tools.ietf.org/html/rfc7643#section-3.1
-type Resource struct {
+type CommonAttributes struct {
 	ID                   string   `json:"id"`
 	ExternalID           string   `json:"externalId"`
 	Meta                 Meta     `json:"meta"`
@@ -34,12 +55,6 @@ type Meta struct {
 	Version      string    `json:"version"`
 }
 
-//Extension is the SCIM method for adapting and extending Resources
-//https://tools.ietf.org/html/rfc7643#section-3.3
-type Extension interface {
-	GetURN() string
-}
-
 //Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
 //https://tools.ietf.org/html/rfc7643#section-2.4
 type Multivalued struct {
@@ -52,38 +67,38 @@ type Multivalued struct {
 //StringMultivalued provides a base structure for simple string multi-valued attributes.
 type StringMultivalued struct {
 	Multivalued
-	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	number.
+	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	numbeca.
 }
 
-func (r *Resource) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
-	r.additionalProperties = additionalProperties
+func (ca *CommonAttributes) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
+	ca.additionalProperties = additionalProperties
 }
 
 //AddExtension adds a new SCIM extension to a SCIM resource.  This method is
 //purposely designed to return an error if the provided extension's URN is
 //already a key in the additionalProperties map.
-func (r *Resource) AddExtension(extension Extension) error {
-	if r.HasExtension(extension) {
+func (ca *CommonAttributes) AddExtension(extension Extension) error {
+	if ca.HasExtension(extension) {
 		return errors.New("Extension to be added already exists in resource - use UpdateExtension() instead")
 	}
-	err := r.putExtension(extension)
+	err := ca.putExtension(extension)
 	return err
 }
 
 //GetExtension retrieves a SCIM Extension from the additionalProperties map
 //by the Extension's URN.
-func (r *Resource) GetExtension(extension Extension) error {
-	name := extension.GetURN()
-	err := json.Unmarshal(r.additionalProperties[name], extension)
+func (ca *CommonAttributes) GetExtension(extension Extension) error {
+	name := extension.ExtensionURN()
+	err := json.Unmarshal(ca.additionalProperties[name], extension)
 	return err
 }
 
 //GetExtensionURNs returns a list of the keys in the additionalProperties
 //map that start with "urn:".  Clearly this is not a perfect way to
 //guarantee that the RawMessage stored in that key is an extension.
-func (r *Resource) GetExtensionURNs() []string {
-	keys := make([]string, 0, len(r.additionalProperties))
-	for key := range r.additionalProperties {
+func (ca *CommonAttributes) GetExtensionURNs() []string {
+	keys := make([]string, 0, len(ca.additionalProperties))
+	for key := range ca.additionalProperties {
 		if strings.HasPrefix(key, "urn:") {
 			keys = append(keys, key)
 		}
@@ -93,26 +108,26 @@ func (r *Resource) GetExtensionURNs() []string {
 
 //HasExtension indicates whether the URN included with the passed
 //Extension is a key in the additionalProperties map.
-func (r *Resource) HasExtension(extension Extension) bool {
-	urn := extension.GetURN()
-	return r.HasExtensionByURN(urn)
+func (ca *CommonAttributes) HasExtension(extension Extension) bool {
+	urn := extension.ExtensionURN()
+	return ca.HasExtensionByURN(urn)
 }
 
 //HasExtensionByURN indicates whether the passed URN string is a key in
 //the additionalProperties map.
-func (r *Resource) HasExtensionByURN(urn string) bool {
-	_, exists := r.additionalProperties[urn]
+func (ca *CommonAttributes) HasExtensionByURN(urn string) bool {
+	_, exists := ca.additionalProperties[urn]
 	return exists
 }
 
-func (r *Resource) putExtension(extension Extension) error {
-	urn := extension.GetURN()
+func (ca *CommonAttributes) putExtension(extension Extension) error {
+	urn := extension.ExtensionURN()
 	var err error
 	var rawMessage json.RawMessage
 	rawMessage, err = json.Marshal(extension)
 
 	if err == nil {
-		r.additionalProperties[urn] = rawMessage
+		ca.additionalProperties[urn] = rawMessage
 	}
 
 	return nil
@@ -120,36 +135,36 @@ func (r *Resource) putExtension(extension Extension) error {
 
 //RemoveExtension deletes the RawMessage with the URN included with the
 //passed SCIM Extension from the additionalProperties map.
-func (r *Resource) RemoveExtension(extension Extension) {
-	r.RemoveExtensionByURN(extension.GetURN())
+func (ca *CommonAttributes) RemoveExtension(extension Extension) {
+	ca.RemoveExtensionByURN(extension.ExtensionURN())
 }
 
 //RemoveExtensionByURN deletes the RawMessage with the key matching
 //the passed URN from the additionalProperties map.
-func (r *Resource) RemoveExtensionByURN(urn string) {
-	delete(r.additionalProperties, urn)
+func (ca *CommonAttributes) RemoveExtensionByURN(urn string) {
+	delete(ca.additionalProperties, urn)
 }
 
 //UpdateExtension changes an existing SCIM extension already stored in a SCIM
 //resource.  This method is purposely designed to return an error if the
 //provided extension's URN is not a key in the additionalProperties map.
-func (r *Resource) UpdateExtension(extension Extension) error {
-	if !r.HasExtension(extension) {
+func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
+	if !ca.HasExtension(extension) {
 		return errors.New("Extension to be updated does not exist in resource - use AddExtension() instead")
 	}
-	err := r.putExtension(extension)
+	err := ca.putExtension(extension)
 	return err
 }
 
 //Unmarshal attempts to decode the JSON provided in the passed data parameter
-//into the Resource provided by the resource parameter.  Any JSON properties
+//into the Resource provided by the resource parameteca.  Any JSON properties
 //(using the JSON schema vernacular) that are not included in the resource's
 //fields are added to the additionalProperties map as RawMessages.  These
 //additional parameters may included SCIM extensions which can be manipulated
 //by methods of the Resource as well as properties that are simply cargo data.
 //In both cases, the additionalProperties are maintained so that a client
 //will (by default) return all the parameters that were originally provided.
-func Unmarshal(data []byte, resource resource) error {
+func Unmarshal(data []byte, resource Resource) error {
 	var err error
 	err = json.Unmarshal(data, resource)
 
@@ -167,7 +182,9 @@ func Unmarshal(data []byte, resource resource) error {
 
 	t := reflect.TypeOf(resource).Elem()
 	removeKnownProperties(additionalProperties, t)
-	resource.addAdditionalProperties(additionalProperties)
+	// TODO
+	// resource.additionalProperties = additionalProperties
+	// resource.addAdditionalProperties(additionalProperties)
 
 	return err
 }

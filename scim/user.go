@@ -3,7 +3,7 @@ package scim
 //User describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.1
 type User struct {
-	Resource
+	CommonAttributes
 	Active            bool              `json:"active"`             //Active informs as to whether this User record is currently live in the system
 	Addresses         []Address         `json:"addresses"`          //Addresses is the  physical mailing address for this User, as described in (address Element). Canonical Type Values of work, home, and other. The value attribute is a complex type with the following sub-attributes.
 	DisplayName       string            `json:"displayName"`        //DisplayName is the name of the User, suitable for display to end-users. The name SHOULD be the full name of the User being described if known
