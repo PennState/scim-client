@@ -23,7 +23,7 @@ type Attribute struct {
 	ReferenceTypes  []string    `json:"referenceTypes"`
 }
 
-type Type = string
+type Type string
 
 const (
 	String    Type = "string"
@@ -35,7 +35,7 @@ const (
 	Complex   Type = "complex"
 )
 
-type Mutability = string
+type Mutability string
 
 const (
 	ReadOnly  Mutability = "readOnly"
@@ -44,7 +44,7 @@ const (
 	WriteOnly Mutability = "writeOnly"
 )
 
-type Returned = string
+type Returned string
 
 const (
 	Always  Returned = "always"
@@ -53,7 +53,7 @@ const (
 	Request Returned = "request"
 )
 
-type Uniqueness = string
+type Uniqueness string
 
 const (
 	None   Uniqueness = "none"
