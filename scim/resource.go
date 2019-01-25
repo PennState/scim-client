@@ -10,26 +10,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ServiceDiscoveryResource interface {
-	ServiceDiscoveryResourceType() resourceType
-	NewServiceDiscoveryResource() ServiceDiscoveryResource
+type Namer interface {
+	URN() string
+}
+
+type ServerDiscoveryResource interface {
+	Namer
+	ResourceType() ResourceType
 }
 
 type Resource interface {
-	//	NewResource() Resource
-	ResourceType() resourceType
-	//	ResourceURN() string
+	ServerDiscoveryResource
+	NewResource() Resource
 }
 
 //Extension is the SCIM method for adapting and extending Resources
 //https://tools.ietf.org/html/rfc7643#section-3.3
-type Extension interface {
-	ExtensionURN() string
-}
-
-type ServiceProviderConfigResource interface {
-	GetServiceProviderConfigResourceURN() string
-}
+type Extension Namer
 
 //https://tools.ietf.org/html/rfc7643#section-3
 type resource interface {
@@ -88,7 +85,7 @@ func (ca *CommonAttributes) AddExtension(extension Extension) error {
 //GetExtension retrieves a SCIM Extension from the additionalProperties map
 //by the Extension's URN.
 func (ca *CommonAttributes) GetExtension(extension Extension) error {
-	name := extension.ExtensionURN()
+	name := extension.URN()
 	err := json.Unmarshal(ca.additionalProperties[name], extension)
 	return err
 }
@@ -109,7 +106,7 @@ func (ca *CommonAttributes) GetExtensionURNs() []string {
 //HasExtension indicates whether the URN included with the passed
 //Extension is a key in the additionalProperties map.
 func (ca *CommonAttributes) HasExtension(extension Extension) bool {
-	urn := extension.ExtensionURN()
+	urn := extension.URN()
 	return ca.HasExtensionByURN(urn)
 }
 
@@ -121,7 +118,7 @@ func (ca *CommonAttributes) HasExtensionByURN(urn string) bool {
 }
 
 func (ca *CommonAttributes) putExtension(extension Extension) error {
-	urn := extension.ExtensionURN()
+	urn := extension.URN()
 	var err error
 	var rawMessage json.RawMessage
 	rawMessage, err = json.Marshal(extension)
@@ -136,7 +133,7 @@ func (ca *CommonAttributes) putExtension(extension Extension) error {
 //RemoveExtension deletes the RawMessage with the URN included with the
 //passed SCIM Extension from the additionalProperties map.
 func (ca *CommonAttributes) RemoveExtension(extension Extension) {
-	ca.RemoveExtensionByURN(extension.ExtensionURN())
+	ca.RemoveExtensionByURN(extension.URN())
 }
 
 //RemoveExtensionByURN deletes the RawMessage with the key matching
@@ -165,9 +162,7 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 //In both cases, the additionalProperties are maintained so that a client
 //will (by default) return all the parameters that were originally provided.
 func Unmarshal(data []byte, resource Resource) error {
-	var err error
-	err = json.Unmarshal(data, resource)
-
+	err := json.Unmarshal(data, resource)
 	if err != nil {
 		log.Error(err)
 		return err
