@@ -1,8 +1,10 @@
 package scim
 
+const SchemaURN = "urn:ietf:params:scim:schemas:core:2.0:Schema"
+
 //https://tools.ietf.org/html/rfc7643#section-7
 type Schema struct {
-	Id          string      `json:"id"`
+	CommonAttributes
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Attributes  []Attribute `json:"attributes"`
@@ -60,3 +62,24 @@ const (
 	Server Uniqueness = "server"
 	Global Uniqueness = "global"
 )
+
+var SchemaResourceType = ResourceType{
+	CommonAttributes: CommonAttributes{
+		Schemas: []string{
+			ResourceTypeURN,
+		},
+		ID: "ResourceType",
+	},
+	Name:        "Schema",
+	Endpoint:    "Schemas",
+	Description: "SCIM Schema - See https://tools.ietf.org/html/rfc7643#section-7",
+	Schema:      SchemaURN,
+}
+
+func (s Schema) URN() string {
+	return SchemaURN
+}
+
+func (s Schema) ResourceType() ResourceType {
+	return SchemaResourceType
+}

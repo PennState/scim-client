@@ -56,21 +56,23 @@ const (
 	HTTPDigest       AuthenticationSchemeType = "httpdigest"
 )
 
-var ServiceProviderConfigResourceType = resourceType{
-	schemas: []string{
-		ResourceTypeURN,
+var ServiceProviderConfigResourceType = ResourceType{
+	CommonAttributes: CommonAttributes{
+		Schemas: []string{
+			ResourceTypeURN,
+		},
+		ID: "ResourceType",
 	},
-	id:          "ServiceProviderConfig",
-	name:        "ServiceProviderConfig",
-	endpoint:    "/ServiceProviderConfig",
-	description: "SCIM Service Provider Config - See https://tools.ietf.org/html/rfc7643#section-5",
-	schema:      ServiceProviderConfigURN,
+	Name:        "ServiceProviderConfig",
+	Endpoint:    "/ServiceProviderConfig",
+	Description: "SCIM Service Provider Config - See https://tools.ietf.org/html/rfc7643#section-5",
+	Schema:      ServiceProviderConfigURN,
 }
 
-func (spc ServiceProviderConfig) ServiceDiscoveryResourceType() resourceType {
+func (spc ServiceProviderConfig) URN() string {
+	return ServiceProviderConfigURN
+}
+
+func (spc ServiceProviderConfig) ResourceType() ResourceType {
 	return ServiceProviderConfigResourceType
-}
-
-func (spc ServiceProviderConfig) NewServiceDiscoveryResource() ServiceDiscoveryResource {
-	return nil
 }

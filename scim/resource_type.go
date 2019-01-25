@@ -38,8 +38,12 @@ var ResourceTypeResourceType = ResourceType{
 	Schema:      ResourceTypeURN,
 }
 
+func (rt ResourceType) URN() string {
+	return ResourceTypeURN
+}
+
 //ServerDiscoveryResourceType allows a ResourceType to retrieve the related
 //metadata for its SCIM type.
-func (rt ResourceType) ServerDiscoveryResourceType() ResourceType {
+func (rt ResourceType) ResourceType() ResourceType {
 	return ResourceTypeResourceType
 }
