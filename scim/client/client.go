@@ -31,12 +31,10 @@ func New(scimServerUrl string, httpClient *http.Client) (Client, error) {
 	return scimClient, err
 }
 
-func (c Client) ForResourceType(resourceType scim.ResourceType) (Client, error) {
-	return c, nil
-}
-
-func (c Client) Get(path string, resource scim.Resource) error {
-	resp, err := c.client.Get(c.server.String() + path)
+func (c Client) RetrieveResource(res scim.Resource, id string) error {
+	path := c.server.String() + res.ResourceType().Endpoint + "/" + id
+	log.Infof("Path: %s", path)
+	resp, err := c.client.Get(path)
 	if err != nil {
 		return err
 	}
@@ -48,69 +46,66 @@ func (c Client) Get(path string, resource scim.Resource) error {
 	}
 	log.Infof("Body: %s", body)
 
-	return scim.Unmarshal(body, resource)
+	return scim.Unmarshal(body, res)
 }
+
+//func CreateResource(res *Resource)
+//func RetrieveResource(res *Resource, id string)
+//func QueryResource(rt ResourceType, sr SearchRequest)
+//func ReplaceResource(res *Resource)
+//func ModifyResource(res *Resource)
+//func DeleteResource(res *Resource) error
+//func Search(lr *ListResponse, sr SearchRequest)
+//func Bulk
+
+//
+//Server Discovery
+//
 
 func (c Client) GetResourceTypes() ([]scim.ResourceType, error) {
 	var resourceTypes []scim.ResourceType
-
-	resp, err := c.client.Get(c.server.String() + "/ResourceTypes")
-	if err != nil {
-		return resourceTypes, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	log.Infof("Body: %s", body)
-
-	err = json.Unmarshal(body, &resourceTypes)
-	return resourceTypes, nil
+	err := c.getServerDiscoveryResources(scim.ResourceTypeResourceType, resourceTypes)
+	return resourceTypes, err
 }
 
 func (c Client) GetSchemas() ([]scim.Schema, error) {
 	var schemas []scim.Schema
-
-	resp, err := c.client.Get(c.server.String() + "/Schemas")
-	if err != nil {
-		return schemas, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return schemas, err
-	}
-	log.Infof("Body: %s", body)
-
-	//return schemas, scim.Unmarshal(body, &schemas)
-	return schemas, nil
+	err := c.getServerDiscoveryResources(scim.SchemaResourceType, &schemas)
+	return schemas, err
 }
 
 func (c Client) GetServerProviderConfig() (scim.ServiceProviderConfig, error) {
 	var cfg scim.ServiceProviderConfig
-	err := c.getServiceDiscoveryEndpoint(&cfg)
+	err := c.getServerDiscoveryResource(&cfg)
 	return cfg, err
-
 }
 
-func (c Client) getServiceDiscoveryEndpoint(r scim.ServiceDiscoveryResource) error {
+func (c Client) getServerDiscoveryResources(typ scim.ResourceType, res interface{}) error {
+	return nil
+}
+
+func (c Client) getServerDiscoveryResource(r scim.ServerDiscoveryResource) error {
 	log.Infof("Type: %v", reflect.TypeOf(r))
-	resp, err := c.client.Get(c.server.String() + r.ServiceDiscoveryResourceType().Endpoint())
+	resp, err := c.client.Get(c.server.String() + r.ResourceType().Endpoint)
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := getStringEntityBody(resp)
 	if err != nil {
 		return err
 	}
-	log.Infof("Body: %s", body)
 
 	return json.Unmarshal(body, r)
 }
 
-// func (c Client) Get()
+//
+//General HTTP client code
+//
+
+func getStringEntityBody(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	log.Infof("Body: %s", body)
+	return body, err
+}
