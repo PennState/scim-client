@@ -1,5 +1,7 @@
 package scim
 
+const ErrorResponseURN = "urn:ietf:params:scim:api:messages:2.0:Error"
+
 //ErrorResponse is a SCIM standard JSON response body used by a SCIM
 //server when an error must be returned to the client.
 //https://tools.ietf.org/html/rfc7644#section-3.12
@@ -9,6 +11,8 @@ type ErrorResponse struct {
 	Detail   string   `json:"detail"`   //Detail is a human-readable message.
 	Status   string   `json:"status"`   //Status is the HTTP status code expressed as a JSON string.
 }
+
+const ListResponseURN = "urn:ietf:params:scim:api:messages:2.0:ListResponse"
 
 //ListResponse defines the SCIM standard response to a valid search query
 //(which might return zero or more results).
