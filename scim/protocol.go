@@ -24,3 +24,35 @@ type ListResponse struct {
 	StartIndex   int        `json:"startIndex"`   //StartIndex is the 1-based index of the first result in the current set of list results.  REQUIRED when partial results are returned due to pagination.
 	TotalResults int        `json:"totalResults"` //TotalResults is the total number of results returned by the list or query operation.  The value may be larger than the number of resources returned, such as when returning a single page (see Section 3.4.2.4) of results where multiple pages are available.
 }
+
+const SearchRequestURN = "urn:ietf:params:scim:api:messages:2.0:SearchRequest"
+
+type searchRequest struct {
+	schemas            []string  `json:"schemas" validate:"required"`
+	Attributes         []string  `json:"attributes"`
+	ExcludedAttributes []string  `json:"ExcludedAttributes"`
+	Filter             string    `json:"filter"`
+	SortBy             string    `json:"sortBy"`
+	SortOrder          sortOrder `json:"sortOrder"`
+	StartIndex         int       `json:"startIndex"`
+	Count              int       `json:"count"`
+}
+
+type sortOrder string
+
+const (
+	Ascending  sortOrder = "ascending"
+	Descending sortOrder = "descending"
+)
+
+func NewSearchRequest() searchRequest {
+	var schemas []string
+	schemas = append(schemas, SearchRequestURN)
+	return searchRequest{
+		schemas: schemas,
+	}
+}
+
+func (sr searchRequest) Schemas() []string {
+	return sr.schemas
+}
