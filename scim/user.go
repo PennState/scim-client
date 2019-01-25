@@ -1,5 +1,7 @@
 package scim
 
+const UserURN = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
+
 //User describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.1
 type User struct {
@@ -71,3 +73,29 @@ type Role StringMultivalued
 
 //X509Certificate provides a DER-encoded X.509 certificate in the StringMultivalued.Value field.
 type X509Certificate StringMultivalued
+
+var UserResourceType = ResourceType{
+	CommonAttributes: CommonAttributes{
+		Schemas: []string{
+			ResourceTypeURN,
+		},
+		ID: "User",
+	},
+	Name:        "User",
+	Endpoint:    "/Users",
+	Description: "SCIM ResourceType - See https://tools.ietf.org/html/rfc7643#section-6",
+	Schema:      ResourceTypeURN,
+}
+
+func (u User) URN() string {
+	return UserURN
+}
+
+func (u User) ResourceType() ResourceType {
+	return UserResourceType
+}
+
+func (u User) NewResource() Resource {
+	var user User
+	return user
+}
