@@ -24,7 +24,7 @@ func main() {
 	scimClient, err := client.New("https://dev.apps.psu.edu/cpr/resources", httpClient)
 
 	var user scim.User
-	//TODO: err = scimClient.Get("/Users/9991533", &user)
+	err = scimClient.RetrieveResource(&user, "9991533")
 	if err != nil {
 		log.Error(err)
 	}
