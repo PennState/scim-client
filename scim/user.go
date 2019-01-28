@@ -1,5 +1,7 @@
 package scim
 
+//UserURN is the IANA registered SCIM name for the standardized SCIM
+//User.
 const UserURN = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
 
 //User describes a SCIM user based on the RFC7643 specification
@@ -74,6 +76,8 @@ type Role StringMultivalued
 //X509Certificate provides a DER-encoded X.509 certificate in the StringMultivalued.Value field.
 type X509Certificate StringMultivalued
 
+//UserResourceType provides the default structure which connects the User
+//struct to its associated ResourceType.
 var UserResourceType = ResourceType{
 	CommonAttributes: CommonAttributes{
 		Schemas: []string{
@@ -87,15 +91,16 @@ var UserResourceType = ResourceType{
 	Schema:      ResourceTypeURN,
 }
 
+//URN returns the IANA registered SCIM name for the User data structure
+//and, together with ResourceType() identifies this code as implementing
+//the Resource interface.
 func (u User) URN() string {
 	return UserURN
 }
 
+//ResourceType returns the default structure describing the availability
+//of the User resource and, together with URN() identifies this code as
+//implementing the Resource interface.
 func (u User) ResourceType() ResourceType {
 	return UserResourceType
-}
-
-func (u User) NewResource() Resource {
-	var user User
-	return user
 }
