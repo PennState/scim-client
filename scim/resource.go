@@ -10,28 +10,34 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Namer interface {
+//Named identifies the implementing code as including a SCIM URN
+type Named interface {
 	URN() string
 }
 
+//ServerDiscoveryResource identifies the implementing code as a SCIM
+//service discovery resource (Schemas, ServiceProviderConfig and
+//ResourceTypes).
 type ServerDiscoveryResource interface {
-	Namer
+	Named
 	ResourceType() ResourceType
 }
 
+type resource interface {
+	addAdditionalProperties(additionalProperties map[string]json.RawMessage)
+}
+
+//Resource identifies the implementing code as a SCIM resource.  Resources
+//defined by the specfication are User and Group.
+//https://tools.ietf.org/html/rfc7643#section-3
 type Resource interface {
+	resource
 	ServerDiscoveryResource
-	NewResource() Resource
 }
 
 //Extension is the SCIM method for adapting and extending Resources
 //https://tools.ietf.org/html/rfc7643#section-3.3
-type Extension Namer
-
-//https://tools.ietf.org/html/rfc7643#section-3
-type resource interface {
-	addAdditionalProperties(additionalProperties map[string]json.RawMessage)
-}
+type Extension Named
 
 //CommonAttributes describes the base common attributes of all Scim Resources
 //https://tools.ietf.org/html/rfc7643#section-3.1
@@ -69,6 +75,7 @@ type StringMultivalued struct {
 
 func (ca *CommonAttributes) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
 	ca.additionalProperties = additionalProperties
+	log.Infof("Saved additional properties: %v", ca.additionalProperties)
 }
 
 //AddExtension adds a new SCIM extension to a SCIM resource.  This method is
@@ -96,7 +103,9 @@ func (ca *CommonAttributes) GetExtension(extension Extension) error {
 func (ca *CommonAttributes) GetExtensionURNs() []string {
 	keys := make([]string, 0, len(ca.additionalProperties))
 	for key := range ca.additionalProperties {
+		log.Infof("Incoming key: %s", key)
 		if strings.HasPrefix(key, "urn:") {
+			log.Infof("Saved key: %s", key)
 			keys = append(keys, key)
 		}
 	}
@@ -161,7 +170,7 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 //by methods of the Resource as well as properties that are simply cargo data.
 //In both cases, the additionalProperties are maintained so that a client
 //will (by default) return all the parameters that were originally provided.
-func Unmarshal(data []byte, resource Resource) error {
+func Unmarshal(data []byte, resource resource) error {
 	err := json.Unmarshal(data, resource)
 	if err != nil {
 		log.Error(err)
@@ -177,9 +186,8 @@ func Unmarshal(data []byte, resource Resource) error {
 
 	t := reflect.TypeOf(resource).Elem()
 	removeKnownProperties(additionalProperties, t)
-	// TODO
-	// resource.additionalProperties = additionalProperties
-	// resource.addAdditionalProperties(additionalProperties)
+	log.Infof("Discovered additional properties: %v", additionalProperties)
+	resource.addAdditionalProperties(additionalProperties)
 
 	return err
 }

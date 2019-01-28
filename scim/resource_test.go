@@ -42,17 +42,17 @@ const resourceWithAdditionalPropertiesJSON = `
 }`
 
 type fakeExtension struct {
-	URN string `json:"urn"`
+	Name string `json:"name"`
 }
 
-func (fe fakeExtension) GetURN() string {
+func (fe fakeExtension) URN() string {
 	return "urn:fake.extension"
 }
 
 type worthlessExtension struct {
 }
 
-func (we worthlessExtension) GetURN() string {
+func (we worthlessExtension) URN() string {
 	return "urn:worthless.extension"
 }
 
@@ -62,15 +62,15 @@ func (we worthlessExtension) GetURN() string {
 //
 //
 
-func getResourceWithAdditionalProperties() Resource {
-	var resource Resource
+func getResourceWithAdditionalProperties() CommonAttributes {
+	var ca CommonAttributes
 
-	resource.ID = "2819c223-7f76-453a-919d-413861904646"
-	resource.additionalProperties = make(map[string]json.RawMessage)
-	resource.additionalProperties["urn:fake.extension"] = json.RawMessage(`{"urn": "Fake Extension"}`)
-	resource.additionalProperties["additionalPropertiesOne"] = json.RawMessage(`"additionalPropertiesOne"`)
-	resource.additionalProperties["additionalPropertiesTwo"] = json.RawMessage(`"additionalPropertiesTwo"`)
-	return resource
+	ca.ID = "2819c223-7f76-453a-919d-413861904646"
+	ca.additionalProperties = make(map[string]json.RawMessage)
+	ca.additionalProperties["urn:fake.extension"] = json.RawMessage(`{"name": "Fake Extension"}`)
+	ca.additionalProperties["additionalPropertiesOne"] = json.RawMessage(`"additionalPropertiesOne"`)
+	ca.additionalProperties["additionalPropertiesTwo"] = json.RawMessage(`"additionalPropertiesTwo"`)
+	return ca
 }
 
 func TestAddExtension(t *testing.T) {
@@ -144,13 +144,13 @@ func TestUpdateExtension(t *testing.T) {
 	assert := assert.New(t)
 	resource := getResourceWithAdditionalProperties()
 	var fakeExtension fakeExtension
-	fakeExtension.URN = "Updated Fake Extension"
+	fakeExtension.Name = "Updated Fake Extension"
 
 	err := resource.UpdateExtension(&fakeExtension)
 	assert.Nil(err)
 	value, exists := resource.additionalProperties["urn:fake.extension"]
 	assert.True(exists)
-	assert.Equal(json.RawMessage(`{"urn":"Updated Fake Extension"}`), value)
+	assert.Equal(json.RawMessage(`{"name":"Updated Fake Extension"}`), value)
 
 	var worthlessExtension worthlessExtension
 	err = resource.UpdateExtension(worthlessExtension)
@@ -166,9 +166,9 @@ func TestUpdateExtension(t *testing.T) {
 func ResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	var Resource = Resource{ID: "2819c223-7f76-453a-919d-413861904646"}
+	var ca = CommonAttributes{ID: "2819c223-7f76-453a-919d-413861904646"}
 
-	b, err := json.Marshal(Resource)
+	b, err := json.Marshal(ca)
 
 	if err != nil {
 
@@ -188,18 +188,18 @@ func ResourceMarshaling(t *testing.T) {
 func TestResourceUnmarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	var resource Resource
-	error := Unmarshal([]byte(resourceJSON), &resource)
+	var ca CommonAttributes
+	error := Unmarshal([]byte(resourceJSON), &ca)
 
 	assert.Nil(error, "Error unmarshaling the User object - %q", error)
-	assert.Equal(resource.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
-	assert.Equal(resource.ExternalID, "43496746-7739-460b-bf99-3421f2970687")
+	assert.Equal(ca.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
+	assert.Equal(ca.ExternalID, "43496746-7739-460b-bf99-3421f2970687")
 
-	assert.Equal(resource.Meta.ResourceType, "User")
-	assert.Equal(resource.Meta.Created, time.Date(2010, time.January, 23, 4, 56, 22, 0, time.UTC))
-	assert.Equal(resource.Meta.LastModified, time.Date(2011, time.May, 13, 4, 42, 34, 0, time.UTC))
-	assert.Equal(resource.Meta.Version, "W/3694e05e9dff590")
-	assert.Equal(resource.Meta.Location, "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646")
+	assert.Equal(ca.Meta.ResourceType, "User")
+	assert.Equal(ca.Meta.Created, time.Date(2010, time.January, 23, 4, 56, 22, 0, time.UTC))
+	assert.Equal(ca.Meta.LastModified, time.Date(2011, time.May, 13, 4, 42, 34, 0, time.UTC))
+	assert.Equal(ca.Meta.Version, "W/3694e05e9dff590")
+	assert.Equal(ca.Meta.Location, "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646")
 }
 
 func TestBadResourceUnmarshaling(t *testing.T) {
@@ -222,7 +222,7 @@ func TestBadResourceUnmarshaling(t *testing.T) {
 		}
 	}`
 
-	var badResource Resource
-	error := Unmarshal([]byte(badResourceJSON), &badResource)
-	assert.NotNil(error)
+	var ca CommonAttributes
+	err := Unmarshal([]byte(badResourceJSON), &ca)
+	assert.NotNil(err)
 }
