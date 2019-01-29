@@ -27,8 +27,8 @@ type ListResponse struct {
 
 const SearchRequestURN = "urn:ietf:params:scim:api:messages:2.0:SearchRequest"
 
-type searchRequest struct {
-	schemas            []string  `json:"schemas" validate:"required"`
+type SearchRequest struct {
+	Schemas            []string  `json:"schemas" validate:"required"`
 	Attributes         []string  `json:"attributes"`
 	ExcludedAttributes []string  `json:"ExcludedAttributes"`
 	Filter             string    `json:"filter"`
@@ -38,21 +38,13 @@ type searchRequest struct {
 	Count              int       `json:"count"`
 }
 
+func URN() string {
+	return SearchRequestURN
+}
+
 type sortOrder string
 
 const (
 	Ascending  sortOrder = "ascending"
 	Descending sortOrder = "descending"
 )
-
-func NewSearchRequest() searchRequest {
-	var schemas []string
-	schemas = append(schemas, SearchRequestURN)
-	return searchRequest{
-		schemas: schemas,
-	}
-}
-
-func (sr searchRequest) Schemas() []string {
-	return sr.schemas
-}
