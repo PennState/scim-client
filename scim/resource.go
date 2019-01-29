@@ -75,7 +75,7 @@ type StringMultivalued struct {
 
 func (ca *CommonAttributes) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
 	ca.additionalProperties = additionalProperties
-	log.Infof("Saved additional properties: %v", ca.additionalProperties)
+	log.Debugf("Saved additional properties: %v", ca.additionalProperties)
 }
 
 //AddExtension adds a new SCIM extension to a SCIM resource.  This method is
@@ -103,9 +103,9 @@ func (ca *CommonAttributes) GetExtension(extension Extension) error {
 func (ca *CommonAttributes) GetExtensionURNs() []string {
 	keys := make([]string, 0, len(ca.additionalProperties))
 	for key := range ca.additionalProperties {
-		log.Infof("Incoming key: %s", key)
+		log.Debugf("Incoming key: %s", key)
 		if strings.HasPrefix(key, "urn:") {
-			log.Infof("Saved key: %s", key)
+			log.Debugf("Saved key: %s", key)
 			keys = append(keys, key)
 		}
 	}
