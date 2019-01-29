@@ -8,33 +8,140 @@ import (
 	"reflect"
 
 	"github.com/PennState/golang_scimclient/scim"
+	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
-type Client struct {
-	server       *url.URL
-	client       *http.Client
-	resourceType scim.ResourceType
+//
+//SCIM client configuration
+//
+
+const sEnvPrefix = "scim"
+
+type ClientConfig struct {
+	ServiceURL       string `split_words:"true" required:"true"`
+	IgnoreRedirects  bool   `split_words:"true"`
+	DisableDiscovery bool   `split_words:"true"`
+	DisableETag      bool   `split_words:"true"`
 }
 
-func New(scimServerUrl string, httpClient *http.Client) (Client, error) {
-	var scimClient Client
-	var err error
+func NewDefaultClientConfig(serviceUrl string) *ClientConfig {
+	var sCfg ClientConfig
+	sCfg.ServiceURL = serviceUrl
+	return &sCfg
+}
 
-	scimClient.server, err = url.Parse(scimServerUrl)
+func NewClientConfigFromEnv() (*ClientConfig, error) {
+	var sCfg ClientConfig
+	err := envconfig.Process(sEnvPrefix, &sCfg)
+	return &sCfg, err
+}
+
+//
+//OAuth2 configuration
+//
+
+const oEnvPrefix = "oauth"
+
+type OAuthConfig struct {
+	ServiceURL   string `split_words:"true" required:"true"`
+	ClientID     string `split_words:"true" required:"true"`
+	ClientSecret string `split_words:"true" required:"true"`
+}
+
+func NewOAuthConfigFromEnv() (*OAuthConfig, error) {
+	var oCfg OAuthConfig
+	err := envconfig.Process(oEnvPrefix, &oCfg)
+	return &oCfg, err
+}
+
+//
+//SCIM client
+//
+
+type client struct {
+	sCfg    *ClientConfig
+	hClient *http.Client
+}
+
+//
+//SCIM client constructors
+//
+
+func NewClient(sCfg *ClientConfig, hClient *http.Client) (*client, error) {
+	var sClient client
+
+	//Validate that the URL is at least formatted correctly
+	_, err := url.Parse(sCfg.ServiceURL)
 	if err != nil {
-		return scimClient, err
+		return &sClient, err
 	}
 
-	scimClient.client = httpClient
-
-	return scimClient, err
+	sClient.hClient = hClient
+	sClient.sCfg = sCfg
+	return &sClient, err
 }
 
-func (c Client) RetrieveResource(res scim.Resource, id string) error {
-	path := c.server.String() + res.ResourceType().Endpoint + "/" + id
+func NewClientFromEnv(hClient *http.Client) (*client, error) {
+	sCfg, err := NewClientConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewClient(sCfg, hClient)
+}
+
+// func NewClient(cfg *ClientConfig, http *http.Client)
+// func NewUnauthenticatedClient()
+// func NewUnauthenticatedClientFromEnv()
+// func NewBasicAuthClient()
+// func NewBasicAuthClientFromEnv()
+
+func NewDefaultClient(serviceUrl string, hClient *http.Client) (*client, error) {
+	var sCfg ClientConfig
+	sCfg.ServiceURL = serviceUrl
+	return NewClient(&sCfg, hClient)
+}
+
+func NewDefaultClientFromEnv(httpClient *http.Client) {
+
+}
+
+func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
+	var ccc = clientcredentials.Config{
+		TokenURL:     oCfg.ServiceURL,
+		ClientID:     oCfg.ClientID,
+		ClientSecret: oCfg.ClientSecret,
+	}
+	hClient := ccc.Client(oauth2.NoContext)
+
+	return NewClient(sCfg, hClient)
+}
+
+func NewOAuthClientFromEnv() (*client, error) {
+	sCfg, err := NewClientConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	oCfg, err := NewOAuthConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewOAuthClient(sCfg, oCfg)
+}
+
+//
+//Resource accessor/mutator methods
+//
+
+func (c client) RetrieveResource(res scim.Resource, id string) error {
+	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 	log.Infof("Path: %s", path)
-	resp, err := c.client.Get(path)
+	resp, err := c.hClient.Get(path)
 	if err != nil {
 		return err
 	}
@@ -62,31 +169,31 @@ func (c Client) RetrieveResource(res scim.Resource, id string) error {
 //Server Discovery
 //
 
-func (c Client) GetResourceTypes() ([]scim.ResourceType, error) {
+func (c client) GetResourceTypes() ([]scim.ResourceType, error) {
 	var resourceTypes []scim.ResourceType
 	err := c.getServerDiscoveryResources(scim.ResourceTypeResourceType, resourceTypes)
 	return resourceTypes, err
 }
 
-func (c Client) GetSchemas() ([]scim.Schema, error) {
+func (c client) GetSchemas() ([]scim.Schema, error) {
 	var schemas []scim.Schema
 	err := c.getServerDiscoveryResources(scim.SchemaResourceType, &schemas)
 	return schemas, err
 }
 
-func (c Client) GetServerProviderConfig() (scim.ServiceProviderConfig, error) {
+func (c client) GetServerProviderConfig() (scim.ServiceProviderConfig, error) {
 	var cfg scim.ServiceProviderConfig
 	err := c.getServerDiscoveryResource(&cfg)
 	return cfg, err
 }
 
-func (c Client) getServerDiscoveryResources(typ scim.ResourceType, res interface{}) error {
+func (c client) getServerDiscoveryResources(typ scim.ResourceType, res interface{}) error {
 	return nil
 }
 
-func (c Client) getServerDiscoveryResource(r scim.ServerDiscoveryResource) error {
+func (c client) getServerDiscoveryResource(r scim.ServerDiscoveryResource) error {
 	log.Infof("Type: %v", reflect.TypeOf(r))
-	resp, err := c.client.Get(c.server.String() + r.ResourceType().Endpoint)
+	resp, err := c.hClient.Get(c.sCfg.ServiceURL + r.ResourceType().Endpoint)
 	if err != nil {
 		return err
 	}
