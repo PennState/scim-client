@@ -1,4 +1,4 @@
-package client
+package scim
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/PennState/golang_scimclient/scim"
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -138,7 +137,7 @@ func NewOAuthClientFromEnv() (*client, error) {
 //Resource accessor/mutator methods
 //
 
-func (c client) RetrieveResource(res scim.Resource, id string) error {
+func (c client) RetrieveResource(res Resource, id string) error {
 	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 	log.Infof("Path: %s", path)
 	resp, err := c.hClient.Get(path)
@@ -153,7 +152,7 @@ func (c client) RetrieveResource(res scim.Resource, id string) error {
 	}
 	log.Infof("Body: %s", body)
 
-	return scim.Unmarshal(body, res)
+	return Unmarshal(body, res)
 }
 
 //func CreateResource(res *Resource)
@@ -169,29 +168,29 @@ func (c client) RetrieveResource(res scim.Resource, id string) error {
 //Server Discovery
 //
 
-func (c client) GetResourceTypes() ([]scim.ResourceType, error) {
-	var resourceTypes []scim.ResourceType
-	err := c.getServerDiscoveryResources(scim.ResourceTypeResourceType, resourceTypes)
+func (c client) GetResourceTypes() ([]ResourceType, error) {
+	var resourceTypes []ResourceType
+	err := c.getServerDiscoveryResources(ResourceTypeResourceType, resourceTypes)
 	return resourceTypes, err
 }
 
-func (c client) GetSchemas() ([]scim.Schema, error) {
-	var schemas []scim.Schema
-	err := c.getServerDiscoveryResources(scim.SchemaResourceType, &schemas)
+func (c client) GetSchemas() ([]Schema, error) {
+	var schemas []Schema
+	err := c.getServerDiscoveryResources(SchemaResourceType, &schemas)
 	return schemas, err
 }
 
-func (c client) GetServerProviderConfig() (scim.ServiceProviderConfig, error) {
-	var cfg scim.ServiceProviderConfig
+func (c client) GetServerProviderConfig() (ServiceProviderConfig, error) {
+	var cfg ServiceProviderConfig
 	err := c.getServerDiscoveryResource(&cfg)
 	return cfg, err
 }
 
-func (c client) getServerDiscoveryResources(typ scim.ResourceType, res interface{}) error {
+func (c client) getServerDiscoveryResources(typ ResourceType, res interface{}) error {
 	return nil
 }
 
-func (c client) getServerDiscoveryResource(r scim.ServerDiscoveryResource) error {
+func (c client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 	log.Infof("Type: %v", reflect.TypeOf(r))
 	resp, err := c.hClient.Get(c.sCfg.ServiceURL + r.ResourceType().Endpoint)
 	if err != nil {
