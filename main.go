@@ -15,24 +15,27 @@ package main
 
 import (
 	"github.com/PennState/golang_scimclient/scim"
-	"github.com/PennState/golang_scimclient/scim/client"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	httpClient := client.GetOauth2AuthenticatedHTTPClientFromEnvironment()
-	scimClient, err := client.New("https://dev.apps.psu.edu/cpr/resources", httpClient)
+	sClient, err := scim.NewOAuthClientFromEnv()
+	if err != nil {
+		return
+	}
 
 	var user scim.User
-	err = scimClient.RetrieveResource(&user, "9991533")
+	err = sClient.RetrieveResource(&user, "9991533")
 	if err != nil {
 		log.Error(err)
 	}
 
 	log.Infof("User: %v", user)
+	extensionURNs := user.GetExtensionURNs()
+	log.Infof("User extensions: %v", extensionURNs)
 
 	var resourceTypes []scim.ResourceType
-	resourceTypes, err = scimClient.GetResourceTypes()
+	resourceTypes, err = sClient.GetResourceTypes()
 	if err != nil {
 		log.Error(err)
 	}
@@ -40,7 +43,7 @@ func main() {
 	log.Infof("ResourceTypes(s) %v", resourceTypes)
 
 	var schemas []scim.Schema
-	schemas, err = scimClient.GetSchemas()
+	schemas, err = sClient.GetSchemas()
 	if err != nil {
 		log.Error(err)
 	}
@@ -48,7 +51,7 @@ func main() {
 	log.Infof("Schema(s): %v", schemas)
 
 	var cfg scim.ServiceProviderConfig
-	cfg, err = scimClient.GetServerProviderConfig()
+	cfg, err = sClient.GetServerProviderConfig()
 	if err != nil {
 		log.Error(err)
 	}
@@ -57,7 +60,7 @@ func main() {
 }
 
 func search() {
-	searchRequest := scim.NewSearchRequest()
+	var searchRequest scim.SearchRequest
 	searchRequest.SortOrder = scim.Ascending
 	searchRequest.SortOrder = "something else"
 	searchRequest.Attributes = []string{"one", "two"}
