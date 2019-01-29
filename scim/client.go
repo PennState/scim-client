@@ -20,10 +20,10 @@ import (
 const sEnvPrefix = "scim"
 
 type ClientConfig struct {
-	ServiceURL       string `split_words:"true" required:"true"`
-	IgnoreRedirects  bool   `split_words:"true"`
-	DisableDiscovery bool   `split_words:"true"`
-	DisableETag      bool   `split_words:"true"`
+	ServiceURL       string `split_words:"true" required:"true"` //ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
+	IgnoreRedirects  bool   `split_words:"true" default:"false"`
+	DisableDiscovery bool   `split_words:"true" default:"false"`
+	DisableEtag      bool   `split_words:"true" default:"false"`
 }
 
 func NewDefaultClientConfig(serviceUrl string) *ClientConfig {
@@ -36,6 +36,10 @@ func NewClientConfigFromEnv() (*ClientConfig, error) {
 	var sCfg ClientConfig
 	err := envconfig.Process(sEnvPrefix, &sCfg)
 	return &sCfg, err
+}
+
+func clientConfigUsage(sCfg *ClientConfig) error {
+	return envconfig.Usage(sEnvPrefix, sCfg)
 }
 
 //
@@ -54,6 +58,10 @@ func NewOAuthConfigFromEnv() (*OAuthConfig, error) {
 	var oCfg OAuthConfig
 	err := envconfig.Process(oEnvPrefix, &oCfg)
 	return &oCfg, err
+}
+
+func oauthConfigUsage(oCfg *OAuthConfig) error {
+	return envconfig.Usage(oEnvPrefix, oCfg)
 }
 
 //
@@ -120,14 +128,12 @@ func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
 }
 
 func NewOAuthClientFromEnv() (*client, error) {
-	sCfg, err := NewClientConfigFromEnv()
-	if err != nil {
-		return nil, err
-	}
-
-	oCfg, err := NewOAuthConfigFromEnv()
-	if err != nil {
-		return nil, err
+	sCfg, err1 := NewClientConfigFromEnv()
+	oCfg, err2 := NewOAuthConfigFromEnv()
+	if err1 != nil || err2 != nil {
+		log.Error(clientConfigUsage(sCfg), err1)
+		log.Error(oauthConfigUsage(oCfg), err2)
+		return nil, err1
 	}
 
 	return NewOAuthClient(sCfg, oCfg)
