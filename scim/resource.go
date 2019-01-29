@@ -186,7 +186,7 @@ func Unmarshal(data []byte, resource resource) error {
 
 	t := reflect.TypeOf(resource).Elem()
 	removeKnownProperties(additionalProperties, t)
-	log.Infof("Discovered additional properties: %v", additionalProperties)
+	log.Debugf("Discovered additional properties: %v", additionalProperties)
 	resource.addAdditionalProperties(additionalProperties)
 
 	return err

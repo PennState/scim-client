@@ -145,7 +145,7 @@ func NewOAuthClientFromEnv() (*client, error) {
 
 func (c client) RetrieveResource(res Resource, id string) error {
 	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
-	log.Infof("Path: %s", path)
+	log.Debugf("Path: %s", path)
 	resp, err := c.hClient.Get(path)
 	if err != nil {
 		return err
@@ -156,7 +156,7 @@ func (c client) RetrieveResource(res Resource, id string) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("Body: %s", body)
+	log.Debugf("Body: %s", body)
 
 	return Unmarshal(body, res)
 }
@@ -197,7 +197,7 @@ func (c client) getServerDiscoveryResources(typ ResourceType, res interface{}) e
 }
 
 func (c client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
-	log.Infof("Type: %v", reflect.TypeOf(r))
+	log.Debugf("Type: %v", reflect.TypeOf(r))
 	resp, err := c.hClient.Get(c.sCfg.ServiceURL + r.ResourceType().Endpoint)
 	if err != nil {
 		return err
