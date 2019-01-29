@@ -42,8 +42,8 @@ func (rt ResourceType) URN() string {
 	return ResourceTypeURN
 }
 
-//ServerDiscoveryResourceType allows a ResourceType to retrieve the related
-//metadata for its SCIM type.
+//ResourceType allows a ResourceType to retrieve the related metadata for
+//its SCIM type.
 func (rt ResourceType) ResourceType() ResourceType {
 	return ResourceTypeResourceType
 }
