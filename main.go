@@ -9,9 +9,10 @@ package main
 //
 //Required env variables are:
 //
-//	OAUTH_SERVICE_URL
-//	OAUTH_CLIENT_ID
-//	OAUTH_CLIENT_SECRET
+//- OAUTH_SERVICE_URL
+//- OAUTH_CLIENT_ID
+//- OAUTH_CLIENT_SECRET
+//- SCIM_SERVICE_URL
 
 import (
 	"github.com/PennState/golang_scimclient/scim"
