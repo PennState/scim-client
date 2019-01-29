@@ -1,11 +1,14 @@
 package scim
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
+	"text/tabwriter"
 
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
@@ -42,6 +45,11 @@ func clientConfigUsage(sCfg *ClientConfig) error {
 	return envconfig.Usage(sEnvPrefix, sCfg)
 }
 
+var sEnvSpec = envSpec{
+	prefix: sEnvPrefix,
+	spec:   new(ClientConfig),
+}
+
 //
 //OAuth2 configuration
 //
@@ -62,6 +70,11 @@ func NewOAuthConfigFromEnv() (*OAuthConfig, error) {
 
 func oauthConfigUsage(oCfg *OAuthConfig) error {
 	return envconfig.Usage(oEnvPrefix, oCfg)
+}
+
+var oEnvSpec = envSpec{
+	prefix: oEnvPrefix,
+	spec:   new(OAuthConfig),
 }
 
 //
@@ -129,11 +142,18 @@ func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
 
 func NewOAuthClientFromEnv() (*client, error) {
 	sCfg, err1 := NewClientConfigFromEnv()
+	if err1 != nil {
+		log.Error(err1)
+	}
+
 	oCfg, err2 := NewOAuthConfigFromEnv()
+	if err2 != nil {
+		log.Error(err2)
+	}
+
 	if err1 != nil || err2 != nil {
-		log.Error(clientConfigUsage(sCfg), err1)
-		log.Error(oauthConfigUsage(oCfg), err2)
-		return nil, err1
+		usage(sEnvSpec, oEnvSpec)
+		return nil, errors.New("Failed to configure the SCIM client - see preceding messages for cause")
 	}
 
 	return NewOAuthClient(sCfg, oCfg)
@@ -218,6 +238,45 @@ func (c client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 func getStringEntityBody(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	log.Infof("Body: %s", body)
+	log.Debugf("Body: %s", body)
 	return body, err
+}
+
+//
+//Error reporting for envconfig
+//
+
+const (
+	multipleTableInstructionHeader = `The method call you've chosen causes this this library to be configured via the
+environment. The following environment variables can be (or in the case of required
+parameters must be) used:
+`
+
+	multipleTableFormatHeader = `
+KEY	TYPE	DEFAULT	REQUIRED	DESCRIPTION
+---	----	-------	--------	-----------
+`
+
+	multipleTableFormatTemplate = `{{range .}}{{usage_key .}}	{{usage_type .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
+{{end}}`
+)
+
+type envSpec struct {
+	prefix string
+	spec   interface{}
+}
+
+type empty struct {
+}
+
+func usage(specs ...envSpec) {
+	buf := new(bytes.Buffer)
+	buf.WriteString(multipleTableInstructionHeader)
+	tabs := tabwriter.NewWriter(buf, 1, 0, 4, ' ', 0)
+	envconfig.Usagef("", new(empty), tabs, multipleTableFormatHeader)
+	for _, spec := range specs {
+		envconfig.Usagef(spec.prefix, spec.spec, tabs, multipleTableFormatTemplate)
+	}
+	tabs.Flush()
+	log.Info(buf)
 }

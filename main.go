@@ -22,6 +22,7 @@ import (
 func main() {
 	sClient, err := scim.NewOAuthClientFromEnv()
 	if err != nil {
+		log.Error(err)
 		return
 	}
 
