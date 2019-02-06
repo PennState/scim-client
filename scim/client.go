@@ -57,7 +57,7 @@ var sEnvSpec = envSpec{
 const oEnvPrefix = "oauth"
 
 type OAuthConfig struct {
-	ServiceURL   string `split_words:"true" required:"true"`
+	TokenURL     string `split_words:"true" required:"true"`
 	ClientID     string `split_words:"true" required:"true"`
 	ClientSecret string `split_words:"true" required:"true"`
 }
@@ -131,7 +131,7 @@ func NewDefaultClientFromEnv(httpClient *http.Client) {
 
 func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
 	var ccc = clientcredentials.Config{
-		TokenURL:     oCfg.ServiceURL,
+		TokenURL:     oCfg.TokenURL,
 		ClientID:     oCfg.ClientID,
 		ClientSecret: oCfg.ClientSecret,
 	}
