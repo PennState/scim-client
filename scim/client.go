@@ -181,12 +181,64 @@ func (c client) RetrieveResource(res Resource, id string) error {
 	return Unmarshal(body, res)
 }
 
+func (c client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {
+	path := c.sCfg.ServiceURL + rt.Endpoint + "/.search"
+	return c.search(path, sr)
+}
+
+func (c client) SearchServer(sr SearchRequest) (ListResponse, error) {
+	path := c.sCfg.ServiceURL + "/.search"
+	return c.search(path, sr)
+}
+
+func (c client) search(path string, sr SearchRequest) (ListResponse, error) {
+	var lr ListResponse
+
+	// TODO: Remove this after SCIMple is fixed
+	if sr.SortOrder == NotSpecified {
+		sr.SortOrder = Ascending
+	}
+
+	srj, err := json.Marshal(sr)
+	if err != nil {
+		return lr, err
+	}
+
+	resp, err := c.hClient.Post(path, "application/json", bytes.NewReader(srj))
+	if err != nil {
+		return lr, err
+	}
+	log.Debug("Search HTTP status code: ", resp.StatusCode)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return lr, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var er ErrorResponse
+		err = json.Unmarshal(body, &er)
+		if err != nil {
+			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
+			return lr, err
+		}
+		log.Error("ErrorResponse: ", er)
+		return lr, errors.New(resp.Status)
+	}
+
+	log.Debug("Body: ", body)
+	err = json.Unmarshal(body, &lr)
+	if err != nil {
+		return lr, err
+	}
+	return lr, nil
+}
+
 //func CreateResource(res *Resource)
-//func QueryResource(rt ResourceType, sr SearchRequest)
 //func ReplaceResource(res *Resource)
 //func ModifyResource(res *Resource)
 //func DeleteResource(res *Resource) error
-//func Search(lr *ListResponse, sr SearchRequest)
 //func Bulk
 
 //
