@@ -7,6 +7,7 @@ require (
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/leodido/go-urn v1.1.0 // indirect
+	github.com/onrik/logrus v0.2.2
 	github.com/sirupsen/logrus v1.2.0
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
