@@ -45,6 +45,7 @@ func URN() string {
 type sortOrder string
 
 const (
-	Ascending  sortOrder = "ascending"
-	Descending sortOrder = "descending"
+	Ascending    sortOrder = "ascending"
+	Descending   sortOrder = "descending"
+	NotSpecified sortOrder = ""
 )
