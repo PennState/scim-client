@@ -182,7 +182,6 @@ func (c client) RetrieveResource(res Resource, id string) error {
 }
 
 //func CreateResource(res *Resource)
-//func RetrieveResource(res *Resource, id string)
 //func QueryResource(rt ResourceType, sr SearchRequest)
 //func ReplaceResource(res *Resource)
 //func ModifyResource(res *Resource)
