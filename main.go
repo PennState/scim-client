@@ -16,10 +16,13 @@ package main
 
 import (
 	"github.com/PennState/golang_scimclient/scim"
+	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	log.AddHook(filename.NewHook())
+
 	sClient, err := scim.NewOAuthClientFromEnv()
 	if err != nil {
 		log.Error(err)
@@ -31,10 +34,21 @@ func main() {
 	if err != nil {
 		log.Error(err)
 	}
-
 	log.Infof("User: %v", user)
 	extensionURNs := user.GetExtensionURNs()
 	log.Infof("User extensions: %v", extensionURNs)
+
+	sr := scim.SearchRequest{
+		Filter: "externalId sw \"9728064\"", // 9991533 has PSU Id 972806446
+	}
+	lr, err := sClient.SearchResource(scim.UserResourceType, sr)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("ListResponse: ", lr)
+	for ord, res := range lr.Resources {
+		log.Infof("ListResponse resource %d: %v", ord, res)
+	}
 
 	var resourceTypes []scim.ResourceType
 	resourceTypes, err = sClient.GetResourceTypes()
