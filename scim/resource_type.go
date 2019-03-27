@@ -9,7 +9,7 @@ const ResourceTypeURN = "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
 //https://tools.ietf.org/html/rfc7643#section-6
 type ResourceType struct {
 	CommonAttributes
-	Name             string            `json:"name" validate:"required`
+	Name             string            `json:"name" validate:"required"`
 	Description      string            `json:"description"`
 	Endpoint         string            `json:"endpoint"`
 	Schema           string            `json:"schema"`
