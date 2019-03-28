@@ -2,7 +2,7 @@ package scim
 
 //UserURN is the IANA registered SCIM name for the standardized SCIM
 //User.
-const UserURN = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
+const UserURN = "urn:ietf:params:scim:schemas:core:2.0:User"
 
 //User describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.1
