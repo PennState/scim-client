@@ -170,6 +170,8 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 //by methods of the Resource as well as properties that are simply cargo data.
 //In both cases, the additionalProperties are maintained so that a client
 //will (by default) return all the parameters that were originally provided.
+//
+//TODO: Convert to UnmarshalJSON interface implementation
 func Unmarshal(data []byte, resource resource) error {
 	err := json.Unmarshal(data, resource)
 	if err != nil {
