@@ -15,6 +15,8 @@ package main
 //- SCIM_SERVICE_URL
 
 import (
+	"encoding/json"
+
 	"github.com/PennState/golang_scimclient/scim"
 	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
@@ -39,6 +41,12 @@ func main() {
 	log.Infof("User: %v", user)
 	extensionURNs := user.GetExtensionURNs()
 	log.Infof("User extensions: %v", extensionURNs)
+
+	j, err := json.Marshal(user)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("User JSON: ", string(j))
 
 	// Finding users who have a specific PSU id prefix
 

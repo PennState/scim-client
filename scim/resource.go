@@ -162,6 +162,8 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 	return err
 }
 
+type JSONResource CommonAttributes
+
 //Unmarshal attempts to decode the JSON provided in the passed data parameter
 //into the Resource provided by the resource parameteca.  Any JSON properties
 //(using the JSON schema vernacular) that are not included in the resource's
@@ -192,6 +194,25 @@ func Unmarshal(data []byte, resource resource) error {
 	resource.addAdditionalProperties(additionalProperties)
 
 	return err
+}
+
+func (r CommonAttributes) MarshalJSON() ([]byte, error) {
+	u, err := json.Marshal(JSONResource(r))
+	if err != nil {
+		return nil, err
+	}
+
+	var um map[string]json.RawMessage
+	err = json.Unmarshal(u, &um)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range r.additionalProperties {
+		um[k] = v
+	}
+
+	return json.Marshal(um)
 }
 
 func jsonName(sf reflect.StructField) string {
