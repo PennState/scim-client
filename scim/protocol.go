@@ -87,6 +87,7 @@ func (lro *ListResponse) UnmarshalJSON(data []byte) error {
 		log.Debug("CA schemas: ", ca.Schemas)
 		log.Debug("CA meta: ", ca.Meta.ResourceType)
 
+		// TODO: Replace this block with code to unmarshall by resource type.
 		var user User
 		err = Unmarshal(rm, &user)
 		if err != nil {
