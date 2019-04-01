@@ -29,6 +29,8 @@ func main() {
 		return
 	}
 
+	// Returns a SCIM user by id
+
 	var user scim.User
 	err = sClient.RetrieveResource(&user, "9991533")
 	if err != nil {
@@ -37,6 +39,8 @@ func main() {
 	log.Infof("User: %v", user)
 	extensionURNs := user.GetExtensionURNs()
 	log.Infof("User extensions: %v", extensionURNs)
+
+	// Finding users who have a specific PSU id prefix
 
 	sr := scim.SearchRequest{
 		Filter: "externalId sw \"9728064\"", // 9991533 has PSU Id 972806446
@@ -50,34 +54,30 @@ func main() {
 		log.Infof("ListResponse resource %d: %v", ord, res)
 	}
 
+	// List the server's resource types
+
 	var resourceTypes []scim.ResourceType
 	resourceTypes, err = sClient.GetResourceTypes()
 	if err != nil {
 		log.Error(err)
 	}
-
 	log.Infof("ResourceTypes(s) %v", resourceTypes)
+
+	// List the server's schemas
 
 	var schemas []scim.Schema
 	schemas, err = sClient.GetSchemas()
 	if err != nil {
 		log.Error(err)
 	}
-
 	log.Infof("Schema(s): %v", schemas)
+
+	// List the server's service provider config
 
 	var cfg scim.ServiceProviderConfig
 	cfg, err = sClient.GetServerProviderConfig()
 	if err != nil {
 		log.Error(err)
 	}
-
 	log.Infof("ServiceProviderConfig: %v", cfg)
-}
-
-func search() {
-	var searchRequest scim.SearchRequest
-	searchRequest.SortOrder = scim.Ascending
-	searchRequest.SortOrder = "something else"
-	searchRequest.Attributes = []string{"one", "two"}
 }
