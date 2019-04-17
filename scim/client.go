@@ -179,6 +179,7 @@ func (c client) RetrieveResource(res Resource, id string) error {
 	log.Debugf("Body: %s", body)
 
 	return Unmarshal(body, res)
+	//return json.Unmarshal(body, res)
 }
 
 func (c client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {

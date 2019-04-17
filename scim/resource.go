@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	ji "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -42,12 +43,15 @@ type Extension Named
 //CommonAttributes describes the base common attributes of all Scim Resources
 //https://tools.ietf.org/html/rfc7643#section-3.1
 type CommonAttributes struct {
-	ID                   string   `json:"id"`
-	ExternalID           string   `json:"externalId"`
-	Meta                 Meta     `json:"meta"`
-	Schemas              []string `json:"schemas"`
-	additionalProperties map[string]json.RawMessage
+	ID                   string               `json:"id"`
+	ExternalID           string               `json:"externalId"`
+	Meta                 Meta                 `json:"meta"`
+	Schemas              []string             `json:"schemas"`
+	AdditionalProperties AdditionalProperties `json:",inline"`
+	additionalProperties AdditionalProperties
 }
+
+type AdditionalProperties map[string]json.RawMessage
 
 //Meta is a complex attribute containing resource metadata.
 type Meta struct {
@@ -162,7 +166,7 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 	return err
 }
 
-type JSONResource CommonAttributes
+type internalJSONResource CommonAttributes
 
 //Unmarshal attempts to decode the JSON provided in the passed data parameter
 //into the Resource provided by the resource parameteca.  Any JSON properties
@@ -175,6 +179,7 @@ type JSONResource CommonAttributes
 //
 //TODO: Convert to UnmarshalJSON interface implementation
 func Unmarshal(data []byte, resource resource) error {
+	log.Info("Got here too: ", reflect.TypeOf(resource).Elem())
 	err := json.Unmarshal(data, resource)
 	if err != nil {
 		log.Error(err)
@@ -196,8 +201,45 @@ func Unmarshal(data []byte, resource resource) error {
 	return err
 }
 
+// func (r resource) blah(data []byte) error {
+// 	return nil
+// }
+
+// func (r resource) UnmarshalJSON(j []byte) error {
+// 	return nil
+// }
+
+func (r *CommonAttributes) UnmarshalJSON1(j []byte) error {
+	log.Info("Got here")
+	err := ji.Unmarshal(j, r)
+	return err
+	// log.Info("Got here!")
+	// log.Info("JSON: ", string(j))
+	// log.Info("UnmarshalJSON type: ", reflect.TypeOf(*r))
+	// t := reflect.TypeOf(r).Elem()
+	// log.Info("Kind: ", t.Kind())
+	// if t.Kind() != reflect.Struct {
+	// 	return errors.New("blah")
+	// }
+
+	// var additionalProperties map[string]json.RawMessage
+	// err := json.Unmarshal(j, &additionalProperties)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return err
+	// }
+
+	// for i := 0; i < t.NumField(); i++ {
+	// 	f := t.Field(i)
+	// 	n := jsonName(f)
+	// 	log.Infof("     Name: %s, Type: %s, Kind: %s", n, f.Type, f.Type.Kind())
+	// }
+
+	// return nil
+}
+
 func (r CommonAttributes) MarshalJSON() ([]byte, error) {
-	u, err := json.Marshal(JSONResource(r))
+	u, err := json.Marshal(internalJSONResource(r))
 	if err != nil {
 		return nil, err
 	}
