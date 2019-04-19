@@ -22,6 +22,7 @@ import (
 
 const sEnvPrefix = "scim"
 
+//ClientConfig ..
 type ClientConfig struct {
 	ServiceURL       string `split_words:"true" required:"true"` //ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
 	IgnoreRedirects  bool   `split_words:"true" default:"false"`
@@ -29,12 +30,14 @@ type ClientConfig struct {
 	DisableEtag      bool   `split_words:"true" default:"false"`
 }
 
-func NewDefaultClientConfig(serviceUrl string) *ClientConfig {
+//NewDefaultClientConfig ..
+func NewDefaultClientConfig(serviceURL string) *ClientConfig {
 	var sCfg ClientConfig
-	sCfg.ServiceURL = serviceUrl
+	sCfg.ServiceURL = serviceURL
 	return &sCfg
 }
 
+//NewClientConfigFromEnv ..
 func NewClientConfigFromEnv() (*ClientConfig, error) {
 	var sCfg ClientConfig
 	err := envconfig.Process(sEnvPrefix, &sCfg)
@@ -56,12 +59,14 @@ var sEnvSpec = envSpec{
 
 const oEnvPrefix = "oauth"
 
+//OAuthConfig holds the oauth parameters for API authentication
 type OAuthConfig struct {
 	TokenURL     string `split_words:"true" required:"true"`
 	ClientID     string `split_words:"true" required:"true"`
 	ClientSecret string `split_words:"true" required:"true"`
 }
 
+//NewOAuthConfigFromEnv searches the environment to get the required oauth parameters
 func NewOAuthConfigFromEnv() (*OAuthConfig, error) {
 	var oCfg OAuthConfig
 	err := envconfig.Process(oEnvPrefix, &oCfg)
@@ -86,12 +91,18 @@ type client struct {
 	hClient *http.Client
 }
 
+//Client allows request scim resources
+type Client struct {
+	client
+}
+
 //
 //SCIM client constructors
 //
 
-func NewClient(sCfg *ClientConfig, hClient *http.Client) (*client, error) {
-	var sClient client
+//NewClient ..
+func NewClient(sCfg *ClientConfig, hClient *http.Client) (*Client, error) {
+	var sClient Client
 
 	//Validate that the URL is at least formatted correctly
 	_, err := url.Parse(sCfg.ServiceURL)
@@ -104,7 +115,8 @@ func NewClient(sCfg *ClientConfig, hClient *http.Client) (*client, error) {
 	return &sClient, err
 }
 
-func NewClientFromEnv(hClient *http.Client) (*client, error) {
+//NewClientFromEnv ..
+func NewClientFromEnv(hClient *http.Client) (*Client, error) {
 	sCfg, err := NewClientConfigFromEnv()
 	if err != nil {
 		return nil, err
@@ -119,17 +131,20 @@ func NewClientFromEnv(hClient *http.Client) (*client, error) {
 // func NewBasicAuthClient()
 // func NewBasicAuthClientFromEnv()
 
-func NewDefaultClient(serviceUrl string, hClient *http.Client) (*client, error) {
+//NewDefaultClient ..
+func NewDefaultClient(serviceURL string, hClient *http.Client) (*Client, error) {
 	var sCfg ClientConfig
-	sCfg.ServiceURL = serviceUrl
+	sCfg.ServiceURL = serviceURL
 	return NewClient(&sCfg, hClient)
 }
 
+//NewDefaultClientFromEnv ..
 func NewDefaultClientFromEnv(httpClient *http.Client) {
 
 }
 
-func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
+//NewOAuthClient ..
+func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*Client, error) {
 	var ccc = clientcredentials.Config{
 		TokenURL:     oCfg.TokenURL,
 		ClientID:     oCfg.ClientID,
@@ -140,7 +155,8 @@ func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*client, error) {
 	return NewClient(sCfg, hClient)
 }
 
-func NewOAuthClientFromEnv() (*client, error) {
+//NewOAuthClientFromEnv ..
+func NewOAuthClientFromEnv() (*Client, error) {
 	sCfg, err1 := NewClientConfigFromEnv()
 	if err1 != nil {
 		log.Error(err1)
@@ -163,7 +179,8 @@ func NewOAuthClientFromEnv() (*client, error) {
 //Resource accessor/mutator methods
 //
 
-func (c client) RetrieveResource(res Resource, id string) error {
+//RetrieveResource ..
+func (c Client) RetrieveResource(res Resource, id string) error {
 	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 	log.Debugf("Path: %s", path)
 	resp, err := c.hClient.Get(path)
@@ -181,17 +198,19 @@ func (c client) RetrieveResource(res Resource, id string) error {
 	return Unmarshal(body, res)
 }
 
-func (c client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {
+//SearchResource ..
+func (c Client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {
 	path := c.sCfg.ServiceURL + rt.Endpoint + "/.search"
 	return c.search(path, sr)
 }
 
-func (c client) SearchServer(sr SearchRequest) (ListResponse, error) {
+//SearchServer ..
+func (c Client) SearchServer(sr SearchRequest) (ListResponse, error) {
 	path := c.sCfg.ServiceURL + "/.search"
 	return c.search(path, sr)
 }
 
-func (c client) search(path string, sr SearchRequest) (ListResponse, error) {
+func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 	var lr ListResponse
 
 	// TODO: Remove this after SCIMple is fixed
@@ -245,29 +264,29 @@ func (c client) search(path string, sr SearchRequest) (ListResponse, error) {
 //Server Discovery
 //
 
-func (c client) GetResourceTypes() ([]ResourceType, error) {
+func (c Client) GetResourceTypes() ([]ResourceType, error) {
 	var resourceTypes []ResourceType
 	err := c.getServerDiscoveryResources(ResourceTypeResourceType, resourceTypes)
 	return resourceTypes, err
 }
 
-func (c client) GetSchemas() ([]Schema, error) {
+func (c Client) GetSchemas() ([]Schema, error) {
 	var schemas []Schema
 	err := c.getServerDiscoveryResources(SchemaResourceType, &schemas)
 	return schemas, err
 }
 
-func (c client) GetServerProviderConfig() (ServiceProviderConfig, error) {
+func (c Client) GetServerProviderConfig() (ServiceProviderConfig, error) {
 	var cfg ServiceProviderConfig
 	err := c.getServerDiscoveryResource(&cfg)
 	return cfg, err
 }
 
-func (c client) getServerDiscoveryResources(typ ResourceType, res interface{}) error {
+func (c Client) getServerDiscoveryResources(typ ResourceType, res interface{}) error {
 	return nil
 }
 
-func (c client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
+func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 	log.Debugf("Type: %v", reflect.TypeOf(r))
 	resp, err := c.hClient.Get(c.sCfg.ServiceURL + r.ResourceType().Endpoint)
 	if err != nil {
