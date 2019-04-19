@@ -104,3 +104,11 @@ func (u User) URN() string {
 func (u User) ResourceType() ResourceType {
 	return UserResourceType
 }
+
+func (u *User) MarshalJSON() ([]byte, error) {
+	return Marshal(u)
+}
+
+func (u *User) UnmarshalJSON(json []byte) error {
+	return Unmarshal(json, u)
+}
