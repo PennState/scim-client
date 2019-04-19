@@ -44,3 +44,11 @@ func (g Group) URN() string {
 func (g Group) ResourceType() ResourceType {
 	return GroupResourceType
 }
+
+func (g *Group) MarshalJSON() ([]byte, error) {
+	return Marshal(g)
+}
+
+func (g *Group) UnmarshalJSON(json []byte) error {
+	return Unmarshal(json, g)
+}
