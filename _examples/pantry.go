@@ -8,8 +8,8 @@ type Pantry struct {
 	Balance  float64 `json:"balance"`  //Balance is the amount the employee owes to the pantry (if negative).  Credits can be represented by positive Balance values
 }
 
-//GetURN returns the SCIM Extension's URN (identifier) and, more importantly
+//URN returns the SCIM Extension's URN (identifier) and, more importantly
 //identifies the Pantry struct as a SCIM extension.
-func (p Pantry) GetURN() string {
+func (p Pantry) URN() string {
 	return "urn:com:example:2.0:Pantry"
 }
