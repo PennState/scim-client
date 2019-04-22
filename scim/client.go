@@ -182,6 +182,43 @@ func NewOAuthClientFromEnv() (*Client, error) {
 //RetrieveResource ..
 func (c Client) RetrieveResource(res Resource, id string) error {
 	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
+
+	return c.runGet(res, path)
+	// log.Debugf("Path: %s", path)
+	// resp, err := c.hClient.Get(path)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// defer resp.Body.Close()
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return err
+	// }
+	// log.Debugf("Body: %s", body)
+
+	// return Unmarshal(body, res)
+}
+
+//RetrieveResourceByUserName is a helper method for retrieving resources by UserName
+func (c Client) RetrieveResourceByUserName(res Resource, userName string) error {
+	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
+	query := url.QueryEscape("?filter=userName EQ " + userName)
+	path += query
+
+	return c.runGet(res, path)
+}
+
+//RetrieveResourceByExternalID is a helper method for retrieving resources by ExternalId
+func (c Client) RetrieveResourceByExternalID(res Resource, externalID string) error {
+	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
+	query := url.QueryEscape("?filter=externalId EQ " + externalID)
+	path += query
+
+	return c.runGet(res, path)
+}
+
+func (c Client) runGet(res Resource, path string) error {
 	log.Debugf("Path: %s", path)
 	resp, err := c.hClient.Get(path)
 	if err != nil {
