@@ -26,7 +26,7 @@ var GroupResourceType = ResourceType{
 		ID: "Group",
 	},
 	Name:        "Group",
-	Endpoint:    "/Groupss",
+	Endpoint:    "/Groups",
 	Description: "SCIM ResourceType - See https://tools.ietf.org/html/rfc7643#section-6",
 	Schema:      ResourceTypeURN,
 }
