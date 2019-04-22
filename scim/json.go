@@ -111,12 +111,6 @@ func unmarshalStruct(data []byte, v interface{}, ap map[string]json.RawMessage) 
 			continue
 		}
 
-		log.Debug("PkgPath: ", ft.PkgPath)
-		log.Debug("Field name: ", ft.Name)
-		if ft.PkgPath != "" || ft.Name == "additionalProperties" {
-			continue
-		}
-
 		//Use the encoding/json version of Unmarshal to turn each
 		//RawMessage into the individual fields
 		err := json.Unmarshal(rm, pv)
