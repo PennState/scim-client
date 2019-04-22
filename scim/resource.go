@@ -164,6 +164,10 @@ func (ca *CommonAttributes) UpdateExtension(extension Extension) error {
 
 type JSONResource CommonAttributes
 
+func Marshal(resource resource) ([]byte, error) {
+	return json.Marshal(resource)
+}
+
 //Unmarshal attempts to decode the JSON provided in the passed data parameter
 //into the Resource provided by the resource parameteca.  Any JSON properties
 //(using the JSON schema vernacular) that are not included in the resource's
@@ -175,45 +179,157 @@ type JSONResource CommonAttributes
 //
 //TODO: Convert to UnmarshalJSON interface implementation
 func Unmarshal(data []byte, resource resource) error {
-	err := json.Unmarshal(data, resource)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
 	var additionalProperties map[string]json.RawMessage
-	err = json.Unmarshal(data, &additionalProperties)
+	err := json.Unmarshal(data, &additionalProperties)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	t := reflect.TypeOf(resource).Elem()
-	removeKnownProperties(additionalProperties, t)
-	log.Debugf("Discovered additional properties: %v", additionalProperties)
+	log.Info("----- Additional properties -----")
+	for k, v := range additionalProperties {
+		log.Info("Key: ", k, ", Value: ", string(v))
+	}
+
+	sv := reflect.ValueOf(resource).Elem()
+	log.Info("Struct value: ", sv)
+	log.Info("Struct value field count: ", sv.NumField())
+	st := reflect.TypeOf(resource).Elem()
+	log.Info("Struct type: ", st)
+	log.Info("Struct type field count: ", st.NumField())
+	setReflectedStruct(sv, st, additionalProperties)
+	// for i := 0; i < sv.NumField(); i++ {
+	// 	fv := sv.Field(i)
+	// 	log.Infof("Field value -- Type: %s, Kind: %s, Value: %v", fv.Type(), fv.Kind(), fv)
+	// 	ft := st.Field(i)
+	// 	log.Infof("Field type -- Name: %s, Type: %s, Kind: %s, Field: %v", ft.Name, ft.Type, ft.Type.Kind(), ft)
+	// 	n := jsonName(ft)
+	// 	log.Info("Effective name: ", n)
+	// 	rm, ok := additionalProperties[n]
+	// 	if !ok {
+	// 		log.Warn("Field not found: ", n)
+	// 		continue
+	// 	}
+	// 	log.Info("Incoming: ", string(rm))
+	// 	setReflectedField(fv, ft, additionalProperties)
+
+	// if ok && v.Kind() == reflect.Struct {
+	// 	log.Infof("Recursing into: %s", n)
+	// 	removeKnownProperties(additionalProperties, v)
+	// }
+	// if ok {
+	// 	value := reflect.New(f.Type)
+	// 	_ = json.Unmarshal(rm, &value)
+	// 	v.Set(value)
+	// }
+	// delete(additionalProperties, n)
+	// 	log.Info("Altered struct value: ", sv)
+	// }
+
+	// removeKnownProperties(additionalProperties, s)
 	resource.addAdditionalProperties(additionalProperties)
 
 	return err
 }
 
-func (r CommonAttributes) MarshalJSON() ([]byte, error) {
-	u, err := json.Marshal(JSONResource(r))
-	if err != nil {
-		return nil, err
-	}
+func setReflectedStruct(sv reflect.Value, st reflect.Type, ap map[string]json.RawMessage) {
+	for i := 0; i < sv.NumField(); i++ {
+		fv := sv.Field(i)
+		log.Infof("Field value -- Type: %s, Kind: %s, Value: %v", fv.Type(), fv.Kind(), fv)
+		ft := st.Field(i)
+		log.Infof("Field type -- Name: %s, Type: %s, Kind: %s, Field: %v", ft.Name, ft.Type, ft.Type.Kind(), ft)
+		// n := jsonName(ft)
+		// log.Info("Effective name: ", n)
+		// rm, ok := ap[n]
+		// if !ok {
+		// 	log.Warn("Field not found: ", n)
+		// 	continue
+		// }
+		// log.Info("Incoming: ", string(rm))
+		setReflectedField(fv, ft, ap)
 
-	var um map[string]json.RawMessage
-	err = json.Unmarshal(u, &um)
-	if err != nil {
-		return nil, err
+		// if ok && v.Kind() == reflect.Struct {
+		// 	log.Infof("Recursing into: %s", n)
+		// 	removeKnownProperties(additionalProperties, v)
+		// }
+		// if ok {
+		// 	value := reflect.New(f.Type)
+		// 	_ = json.Unmarshal(rm, &value)
+		// 	v.Set(value)
+		// }
+		log.Info("Altered struct value: ", sv)
 	}
-
-	for k, v := range r.additionalProperties {
-		um[k] = v
-	}
-
-	return json.Marshal(um)
 }
+
+func setReflectedField(fv reflect.Value, ft reflect.StructField, ap map[string]json.RawMessage) {
+	//Embedded structs
+	if ft.Type.Kind() == reflect.Struct && strings.HasSuffix(ft.Type.String(), ft.Name) {
+		//TODO: recursion goes here
+		log.Info("Descending into embedded struct: ", ft.Name)
+		setReflectedStruct(fv, ft.Type, ap)
+		return
+	}
+
+	n := jsonName(ft)
+	log.Info("Effective name: ", n)
+	rm, ok := ap[n]
+	if !ok {
+		log.Warn("Field not found: ", n)
+		return
+	}
+	log.Info("Incoming: ", string(rm))
+
+	//value := reflect.New(fv.Type())
+	//p := unsafe.Pointer(fv.Addr().Pointer())
+	//p := unsafe.Pointer(value.Addr().Pointer())
+	value, err := valueInstance(fv)
+	if err != nil {
+		return
+	}
+	_ = json.Unmarshal(rm, &value)
+	log.Info("Unmarshaled raw message: ", value)
+
+	log.Info("Mutable: ", fv.CanSet())
+	fv.Set(reflect.ValueOf(value))
+
+	log.Info("Deleting additional property: ", n)
+	delete(ap, n)
+}
+
+func valueInstance(value reflect.Value) (interface{}, error) {
+	switch value.Type().Kind() {
+	case reflect.Bool:
+		var b bool
+		return b, nil
+	case reflect.Float32, reflect.Float64:
+		var f float64
+		return f, nil
+	case reflect.String:
+		var s string
+		return s, nil
+	}
+
+	return nil, errors.New("Couldn't do it")
+}
+
+// func (r CommonAttributes) MarshalJSON() ([]byte, error) {
+// 	u, err := json.Marshal(JSONResource(r))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var um map[string]json.RawMessage
+// 	err = json.Unmarshal(u, &um)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	for k, v := range r.additionalProperties {
+// 		um[k] = v
+// 	}
+
+// 	return json.Marshal(um)
+// }
 
 func jsonName(sf reflect.StructField) string {
 	t := sf.Tag.Get("json")
@@ -229,18 +345,39 @@ func jsonName(sf reflect.StructField) string {
 	return sf.Name
 }
 
-func removeKnownProperties(additionalProperties map[string]json.RawMessage, t reflect.Type) {
-	for i := 0; i < t.NumField(); i++ {
-		f := t.Field(i)
+func removeKnownProperties(additionalProperties map[string]json.RawMessage, s reflect.Value) {
+	for i := 0; i < s.NumField(); i++ {
+		v := s.Field(i)
+		f := v.Type().Field(i)
 		n := jsonName(f)
-		if strings.HasSuffix(f.Type.Name(), n) && f.Type.Kind() == reflect.Struct {
-			log.Debugf("Recursing into: %s", n)
-			removeKnownProperties(additionalProperties, f.Type)
-		} else {
-			log.Debugf("Name: %s, Type: %s, Kind: %s", n, f.Type, f.Type.Kind())
+		log.Infof("Type -- Name: %s, Type: %s, Kind: %s, Field: %v", v.Type().Name(), v.Type(), v.Type().Kind(), f)
+		log.Infof("Value -- Name: %s, Type: %s, Kind: %s, Value: %v", n, v.Type(), v.Kind(), v)
+		rm, ok := additionalProperties[n]
+		if ok && v.Kind() == reflect.Struct {
+			log.Infof("Recursing into: %s", n)
+			removeKnownProperties(additionalProperties, v)
 			delete(additionalProperties, n)
+			continue
 		}
+		if ok {
+			value := reflect.New(f.Type)
+			_ = json.Unmarshal(rm, &value)
+			v.Set(value)
+		}
+
+		delete(additionalProperties, n)
 	}
+	// for i := 0; i < t.NumField(); i++ {
+	// 	f := t.Field(i)
+	// 	n := jsonName(f)
+	// 	if strings.HasSuffix(f.Type.Name(), n) && f.Type.Kind() == reflect.Struct {
+	// 		log.Debugf("Recursing into: %s", n)
+	// 		removeKnownProperties(additionalProperties, f.Type)
+	// 	} else {
+	// 		log.Debugf("Name: %s, Type: %s, Kind: %s", n, f.Type, f.Type.Kind())
+	// 		delete(additionalProperties, n)
+	// 	}
+	// }
 }
 
 //
