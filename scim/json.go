@@ -17,7 +17,7 @@ func Unmarshal(data []byte, v resource) error {
 	if t.Kind() != reflect.Struct {
 		return json.Unmarshal(data, v)
 	}
-	log.Info("Kind: ", t.Kind())
+	log.Debug("Kind: ", t.Kind())
 	return unmarshalResource(data, v)
 }
 
@@ -30,7 +30,7 @@ func dereference(t reflect.Type) reflect.Type {
 
 func name(sf reflect.StructField) string {
 	t := sf.Tag.Get("json")
-	log.Debugf("Tag: %s", t)
+	log.Debug("Tag: ", t)
 
 	if t != "" {
 		if idx := strings.Index(t, ","); idx != -1 {
@@ -61,56 +61,73 @@ func unmarshalResource(data []byte, resource resource) error {
 func unmarshalStruct(data []byte, v interface{}, ap map[string]json.RawMessage) error {
 	st := reflect.TypeOf(v).Elem()
 	sv := reflect.ValueOf(v).Elem()
-	for i := 0; i < st.NumField(); i++ {
-		log.Info("RawMessage count: ", len(ap))
 
+	//Iterate through the struct's fields
+	for i := 0; i < st.NumField(); i++ {
+		log.Debug("RawMessage count: ", len(ap))
+
+		//Get the field's JSON name
 		ft := st.Field(i)
-		log.Info("Field type: ", ft)
+		log.Debug("Field type: ", ft)
 		n := name(ft)
 
+		//Fields tagged with "-" should not be marshaled/unmarshaled so go
+		//to the next field
 		if n == "-" {
 			continue
 		}
 
+		//Fields that can't be addressed or interfaced can't be set through
+		//reflection so go to the next field
 		fv := sv.Field(i)
-		log.Info("CanAddr: ", fv.CanAddr())
-		log.Info("CanInterface: ", fv.CanInterface())
+		log.Debug("CanAddr: ", fv.CanAddr())
+		log.Debug("CanInterface: ", fv.CanInterface())
 		if !fv.CanAddr() || !fv.CanInterface() {
 			continue
 		}
 
-		log.Info("Field value before: ", fv)
+		//Get a pointer to the value to pass so that we can either recurse
+		//into anonymous structures or unmarshal it outright
+		log.Debug("Field value before: ", fv)
 		pv := fv.Addr().Interface()
-		log.Info("Field pointer: ", reflect.TypeOf(pv).Elem())
+		log.Debug("Field pointer: ", reflect.TypeOf(pv).Elem())
 
-		// if ft.Type.Kind() == reflect.Struct && strings.HasSuffix(ft.Type.String(), ft.Name) {
+		//Anonymous struct's fields are part of the current JSON object
+		//but we have to recurse into them to set their fields
 		if ft.Anonymous {
 			err := unmarshalStruct(data, pv, ap)
 			if err != nil {
 				return err
 			}
-			log.Info("Anonymous field value after: ", fv)
+			log.Debug("Anonymous field value after: ", fv)
 			continue
 		}
 
+		//If a RawMessage doesn't exist for a given field name there's no
+		//point wasting resources trying to unmarshal it
 		rm, ok := ap[n]
 		if !ok {
 			log.Info("No raw message found: ", n)
 			continue
 		}
 
-		log.Info("PkgPath: ", ft.PkgPath)
-		log.Info("Field name: ", ft.Name)
+		log.Debug("PkgPath: ", ft.PkgPath)
+		log.Debug("Field name: ", ft.Name)
 		if ft.PkgPath != "" || ft.Name == "additionalProperties" {
 			continue
 		}
 
+		//Use the encoding/json version of Unmarshal to turn each
+		//RawMessage into the individual fields
 		err := json.Unmarshal(rm, pv)
-		log.Info("Field value after: ", fv)
+		log.Debug("Field value after: ", fv)
 		if err != nil {
 			return err
 		}
-		log.Info("Struct value now: ", sv)
+
+		//As fields are unmarshaled the struct's values will be filled
+		//in and the RawMessageCount will decrease
+		log.Debug("Struct value now: ", sv)
 		delete(ap, n)
 	}
 
