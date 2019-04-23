@@ -8,8 +8,53 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Marshal(v resource) ([]byte, error) {
-	return nil, nil
+func Marshal(r resource) ([]byte, error) {
+	//Unmarshal everything but struct's using the default (json.Marshal)
+	t := dereference(reflect.TypeOf(r))
+	if t.Kind() != reflect.Struct {
+		return json.Marshal(r)
+	}
+
+	ap := r.getAdditionalProperties()
+
+	//Iterate over the individual fields
+	st := reflect.TypeOf(r).Elem()
+	sv := reflect.ValueOf(r).Elem()
+	for i := 0; i < st.NumField(); i++ {
+		ft := st.Field(i)
+		log.Debug("Field type: ", ft)
+		n := name(ft)
+
+		//Skip fields that are tagged with "-"
+		if n == "-" {
+			continue
+		}
+
+		fv := sv.Field(i)
+		log.Debug("Value: ", fv)
+
+		//Skip fields that are not both addressable and interfaceable
+		log.Debug("Addressable: ", fv.CanAddr())
+		log.Debug("Interfacable: ", fv.CanInterface())
+		if !fv.CanAddr() || !fv.CanInterface() {
+			continue
+		}
+
+		//Marshal all the other fields
+		m, err := json.Marshal(fv.Interface())
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		//Add them to the additional properties map as json.RawMessages
+		log.Debug("Marshalled: ", string(m))
+		ap[n] = json.RawMessage(m)
+	}
+
+	//Marshal the map that now contains all the struct's fields plus the
+	//original additional properties
+	return json.Marshal(r.getAdditionalProperties())
 }
 
 func Unmarshal(data []byte, v resource) error {
@@ -17,7 +62,6 @@ func Unmarshal(data []byte, v resource) error {
 	if t.Kind() != reflect.Struct {
 		return json.Unmarshal(data, v)
 	}
-	log.Debug("Kind: ", t.Kind())
 	return unmarshalResource(data, v)
 }
 
@@ -107,7 +151,7 @@ func unmarshalStruct(data []byte, v interface{}, ap map[string]json.RawMessage) 
 		//point wasting resources trying to unmarshal it
 		rm, ok := ap[n]
 		if !ok {
-			log.Info("No raw message found: ", n)
+			log.Debug("No raw message found: ", n)
 			continue
 		}
 

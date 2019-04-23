@@ -2,16 +2,17 @@ package scim
 
 import (
 	"encoding/json"
+	"reflect"
 	"sort"
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const resourceJSON = `
-{
+const resourceJSON = `{
 	"id": "2819c223-7f76-453a-919d-413861904646",
 	"externalId": "43496746-7739-460b-bf99-3421f2970687",
 	"meta": {
@@ -163,20 +164,57 @@ func TestUpdateExtension(t *testing.T) {
 //
 //
 
-func ResourceMarshaling(t *testing.T) {
+func TestResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 
-	var ca = CommonAttributes{ID: "2819c223-7f76-453a-919d-413861904646"}
-
-	b, err := json.Marshal(ca)
-
+	ca := getResourceWithAdditionalProperties()
+	data, err := Marshal(&ca)
 	if err != nil {
-
+		assert.Error(err)
 	}
 
-	expected := json.RawMessage(resourceJSON)
-	actual := json.RawMessage(b)
-	assert.Equal(actual, expected)
+	var obj map[string]json.RawMessage
+	err = json.Unmarshal(data, &obj)
+	if err != nil {
+		assert.Error(err)
+	}
+	assert.Contains(obj, "id", "meta", "urn:fake.extension", "additionalPropertiesOne", "additionalPropertiesTwo")
+	assert.Equal("{\"name\":\"Fake Extension\"}", string(obj["urn:fake.extension"]))
+	assert.Equal("\"additionalPropertiesOne\"", string(obj["additionalPropertiesOne"]))
+	assert.Equal("\"additionalPropertiesTwo\"", string(obj["additionalPropertiesTwo"]))
+	meta := "{\"resourceType\":\"\",\"created\":\"0001-01-01T00:00:00Z\",\"lastModified\":\"0001-01-01T00:00:00Z\",\"location\":\"\",\"version\":\"\"}"
+	assert.Equal(meta, string(obj["meta"]))
+}
+
+func DefaultJsonMarshalling(t *testing.T) {
+	var values = []interface{}{
+		"",
+		"this is a test",
+		nil,
+		123,
+		123.456,
+		true,
+		false,
+	}
+	for _, v := range values {
+		log.Info("Value: ", v)
+		m, err := json.Marshal(v)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info("Marshaled: ", string(m))
+	}
+
+	u := "2819c223-7f76-453a-919d-413861904646"
+	log.Info("UUID: ", u)
+	v := reflect.ValueOf(u)
+	log.Info("Value: ", v)
+	m, err := json.Marshal(v.Interface())
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("Marshaled: ", m)
 }
 
 //
