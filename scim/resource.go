@@ -24,6 +24,7 @@ type ServerDiscoveryResource interface {
 
 type resource interface {
 	addAdditionalProperties(additionalProperties map[string]json.RawMessage)
+	getAdditionalProperties() map[string]json.RawMessage
 }
 
 //Resource identifies the implementing code as a SCIM resource.  Resources
@@ -75,6 +76,10 @@ type StringMultivalued struct {
 func (ca *CommonAttributes) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
 	ca.additionalProperties = additionalProperties
 	log.Debugf("Saved additional properties: %v", ca.additionalProperties)
+}
+
+func (ca CommonAttributes) getAdditionalProperties() map[string]json.RawMessage {
+	return ca.additionalProperties
 }
 
 //AddExtension adds a new SCIM extension to a SCIM resource.  This method is
