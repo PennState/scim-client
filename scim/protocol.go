@@ -44,7 +44,7 @@ const SearchRequestURN = "urn:ietf:params:scim:api:messages:2.0:SearchRequest"
 type SearchRequest struct {
 	Schemas            []string  `json:"schemas" validate:"required"`
 	Attributes         []string  `json:"attributes"`
-	ExcludedAttributes []string  `json:"ExcludedAttributes"`
+	ExcludedAttributes []string  `json:"excludedAttributes"`
 	Filter             string    `json:"filter"`
 	SortBy             string    `json:"sortBy"`
 	SortOrder          sortOrder `json:"sortOrder"`
