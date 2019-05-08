@@ -183,42 +183,6 @@ func NewOAuthClientFromEnv() (*Client, error) {
 func (c Client) RetrieveResource(res Resource, id string) error {
 	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 
-	return c.runGet(res, path)
-	// log.Debugf("Path: %s", path)
-	// resp, err := c.hClient.Get(path)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return err
-	// }
-	// log.Debugf("Body: %s", body)
-
-	// return Unmarshal(body, res)
-}
-
-//RetrieveResourceByUserName is a helper method for retrieving resources by UserName
-func (c Client) RetrieveResourceByUserName(res Resource, userName string) error {
-	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
-	query := url.QueryEscape("?filter=userName EQ " + userName)
-	path += query
-
-	return c.runGet(res, path)
-}
-
-//RetrieveResourceByExternalID is a helper method for retrieving resources by ExternalId
-func (c Client) RetrieveResourceByExternalID(res Resource, externalID string) error {
-	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
-	query := url.QueryEscape("?filter=externalId EQ " + externalID)
-	path += query
-
-	return c.runGet(res, path)
-}
-
-func (c Client) runGet(res Resource, path string) error {
 	log.Debugf("Path: %s", path)
 	resp, err := c.hClient.Get(path)
 	if err != nil {
@@ -248,6 +212,7 @@ func (c Client) SearchServer(sr SearchRequest) (ListResponse, error) {
 }
 
 func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
+	log.Debug("Path: ", path)
 	var lr ListResponse
 
 	// TODO: Remove this after SCIMple is fixed
@@ -255,10 +220,16 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 		sr.SortOrder = Ascending
 	}
 
+	//TODO if you ask for 0 records, you'll get what you ask for
+	if sr.Count == 0 {
+		sr.Count = 1000
+	}
+
 	srj, err := json.Marshal(sr)
 	if err != nil {
 		return lr, err
 	}
+	log.Debug("SearchRequest JSON: ", string(srj))
 
 	resp, err := c.hClient.Post(path, "application/json", bytes.NewReader(srj))
 	if err != nil {
@@ -283,7 +254,7 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 		return lr, errors.New(resp.Status)
 	}
 
-	log.Debug("Body: ", body)
+	log.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &lr)
 	if err != nil {
 		return lr, err
@@ -336,6 +307,25 @@ func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 	}
 
 	return json.Unmarshal(body, r)
+}
+
+//
+// Convenience methods
+
+//RetrieveResourceByUserName is a helper method for retrieving resources by UserName
+func (c Client) SearchUserResourcesByUserName(userName string) (ListResponse, error) {
+	sr := SearchRequest{
+		Filter: "userName EQ \"" + userName + "\"",
+	}
+	return c.SearchResource(UserResourceType, sr)
+}
+
+//RetrieveResourceByExternalID is a helper method for retrieving resources by ExternalId
+func (c Client) SearchResourcesByExternalID(rt ResourceType, externalID string) (ListResponse, error) {
+	sr := SearchRequest{
+		Filter: "externalId EQ \"" + externalID + "\"",
+	}
+	return c.SearchResource(rt, sr)
 }
 
 //

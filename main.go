@@ -50,10 +50,33 @@ func main() {
 
 	// Finding users who have a specific PSU id prefix
 
+	log.Info("===== Finding users who have a specific PSU id prefix =====")
 	sr := scim.SearchRequest{
-		Filter: "externalId sw \"9728064\"", // 9991533 has PSU Id 972806446
+		Filter: "externalId SW \"972806\"", // 9991533 has PSU Id 972806446
 	}
 	lr, err := sClient.SearchResource(scim.UserResourceType, sr)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("ListResponse: ", lr)
+	for ord, res := range lr.Resources {
+		log.Infof("ListResponse resource %d: %v", ord, res)
+	}
+
+	// Search using the convenience methods
+
+	log.Info("===== Search using the convenience method - SearchUserResourcesByUserName =====")
+	lr, err = sClient.SearchUserResourcesByUserName("swm16")
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("ListResponse: ", lr)
+	for ord, res := range lr.Resources {
+		log.Infof("ListResponse resource %d: %v", ord, res)
+	}
+
+	log.Info("===== Search using the convenience method - SearchResourcesByExternalId =====")
+	lr, err = sClient.SearchResourcesByExternalID(scim.UserResourceType, "972806446")
 	if err != nil {
 		log.Error(err)
 	}

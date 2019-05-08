@@ -66,6 +66,7 @@ const (
 
 func (lro *ListResponse) UnmarshalJSON(data []byte) error {
 	log.Trace("-> (ListResponse) UnmarshalJSON([]byte) error")
+	log.Debug("ListResponse raw data: ", string(data))
 	var lri listResponse
 	err := json.Unmarshal(data, &lri)
 	if err != nil {
