@@ -43,13 +43,13 @@ const SearchRequestURN = "urn:ietf:params:scim:api:messages:2.0:SearchRequest"
 
 type SearchRequest struct {
 	Schemas            []string  `json:"schemas" validate:"required"`
-	Attributes         []string  `json:"attributes"`
-	ExcludedAttributes []string  `json:"excludedAttributes"`
-	Filter             string    `json:"filter"`
-	SortBy             string    `json:"sortBy"`
-	SortOrder          sortOrder `json:"sortOrder"`
-	StartIndex         int       `json:"startIndex"`
-	Count              int       `json:"count"`
+	Attributes         []string  `json:"attributes,omitempty"`
+	ExcludedAttributes []string  `json:"excludedAttributes,omitempty"`
+	Filter             string    `json:"filter" validate:"required"`
+	SortBy             string    `json:"sortBy,omitempty"`
+	SortOrder          sortOrder `json:"sortOrder,omitempty"`
+	StartIndex         int       `json:"startIndex,omitempty"`
+	Count              int       `json:"count,omitempty"`
 }
 
 func URN() string {

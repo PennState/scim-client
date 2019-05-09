@@ -220,11 +220,6 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 		sr.SortOrder = Ascending
 	}
 
-	//TODO if you ask for 0 records, you'll get what you ask for
-	if sr.Count == 0 {
-		sr.Count = 1000
-	}
-
 	srj, err := json.Marshal(sr)
 	if err != nil {
 		return lr, err
