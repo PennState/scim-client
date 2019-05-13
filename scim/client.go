@@ -257,8 +257,55 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 	return lr, nil
 }
 
-//func CreateResource(res *Resource)
-//func ReplaceResource(res *Resource)
+//func (c Client) CreateResource(res *Resource) error
+
+//ReplaceResource ..
+func (c Client) ReplaceResource(res Resource) error {
+	log.Info("(c Client) ReplaceResource(res)")
+	rj, err := json.Marshal(res)
+	if err != nil {
+		return err
+	}
+	log.Info("Marshaled resource: ", string(rj))
+
+	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + res.getID()
+	req, err := http.NewRequest("PUT", path, bytes.NewReader(rj))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/scim+json")
+	if !c.sCfg.DisableEtag {
+		req.Header.Set("If-Match", res.getMeta().Version)
+	}
+
+	resp, err := c.hClient.Do(req)
+	if err != nil {
+		return err
+	}
+	log.Info("Replace HTTP status code: ", resp.StatusCode)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	log.Infof("Body: %s", body)
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var er ErrorResponse
+		err = json.Unmarshal(body, &er)
+		if err != nil {
+			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
+			return err
+		}
+		log.Error("ErrorResponse: ", er)
+		return errors.New(resp.Status)
+	}
+
+	return Unmarshal(body, res)
+}
+
 //func ModifyResource(res *Resource)
 //func DeleteResource(res *Resource) error
 //func Bulk
@@ -305,9 +352,10 @@ func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 }
 
 //
-// Convenience methods
+//Convenience methods
+//
 
-//RetrieveResourceByUserName is a helper method for retrieving resources by UserName
+//SearchUserResourcesByUserName is a helper method for retrieving resources by UserName
 func (c Client) SearchUserResourcesByUserName(userName string) (ListResponse, error) {
 	sr := SearchRequest{
 		Filter: "userName EQ \"" + userName + "\"",
@@ -315,13 +363,17 @@ func (c Client) SearchUserResourcesByUserName(userName string) (ListResponse, er
 	return c.SearchResource(UserResourceType, sr)
 }
 
-//RetrieveResourceByExternalID is a helper method for retrieving resources by ExternalId
+//SearchResourcesByExternalID is a helper method for retrieving resources by ExternalId
 func (c Client) SearchResourcesByExternalID(rt ResourceType, externalID string) (ListResponse, error) {
 	sr := SearchRequest{
 		Filter: "externalId EQ \"" + externalID + "\"",
 	}
 	return c.SearchResource(rt, sr)
 }
+
+//
+//SCIM client code
+//
 
 //
 //General HTTP client code
