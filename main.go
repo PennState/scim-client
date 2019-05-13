@@ -85,6 +85,24 @@ func main() {
 		log.Infof("ListResponse resource %d: %v", ord, res)
 	}
 
+	// Replace the user's resource
+
+	log.Info("===== ReplaceResource =====")
+	err = sClient.ReplaceResource(&user)
+	if err != nil {
+		log.Error(err)
+	}
+	//	user.Name.GivenName = "Stephen"
+	log.Infof("User: %v", user)
+	extensionURNs = user.GetExtensionURNs()
+	log.Infof("User extensions: %v", extensionURNs)
+
+	j, err = json.Marshal(user)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Info("User JSON: ", string(j))
+
 	// List the server's resource types
 
 	var resourceTypes []scim.ResourceType
