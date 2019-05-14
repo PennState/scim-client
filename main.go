@@ -88,11 +88,11 @@ func main() {
 	// Replace the user's resource
 
 	log.Info("===== ReplaceResource =====")
+	user.Name.GivenName = "Stephen"
 	err = sClient.ReplaceResource(&user)
 	if err != nil {
 		log.Error(err)
 	}
-	//	user.Name.GivenName = "Stephen"
 	log.Infof("User: %v", user)
 	extensionURNs = user.GetExtensionURNs()
 	log.Infof("User extensions: %v", extensionURNs)
@@ -105,6 +105,7 @@ func main() {
 
 	// List the server's resource types
 
+	log.Info("===== List the server's resource types =====")
 	var resourceTypes []scim.ResourceType
 	resourceTypes, err = sClient.GetResourceTypes()
 	if err != nil {
