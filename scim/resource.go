@@ -44,11 +44,11 @@ type Extension Named
 //CommonAttributes describes the base common attributes of all Scim Resources
 //https://tools.ietf.org/html/rfc7643#section-3.1
 type CommonAttributes struct {
-	ID                   string   `json:"id"`
-	ExternalID           string   `json:"externalId"`
-	Meta                 Meta     `json:"meta"`
-	Schemas              []string `json:"schemas"`
-	additionalProperties map[string]json.RawMessage
+	ID                   string                     `json:"id"`
+	ExternalID           string                     `json:"externalId"`
+	Meta                 Meta                       `json:"meta"`
+	Schemas              []string                   `json:"schemas"`
+	additionalProperties map[string]json.RawMessage `json:"*"`
 }
 
 //Meta is a complex attribute containing resource metadata.
