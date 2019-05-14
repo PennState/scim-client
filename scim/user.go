@@ -1,5 +1,7 @@
 package scim
 
+import jap "github.com/PennState/go-additional-properties/pkg/json"
+
 //UserURN is the IANA registered SCIM name for the standardized SCIM
 //User.
 const UserURN = "urn:ietf:params:scim:schemas:core:2.0:User"
@@ -56,12 +58,12 @@ type IM StringMultivalued
 
 //Name is the name of the user
 type Name struct {
-	Formatted       string `json:"formatted"`       //Formatted is the full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g. Ms. Barbara J Jensen, III.)
-	FamilyName      string `json:"familyName"`      //FamilyName is the family name of the User, or Last Name in most Western languages (e.g. Jensen given the full name Ms. Barbara J Jensen, III.)
-	GivenName       string `json:"givenName"`       //GiveName is the given name of the User, or First Name in most Western languages (e.g. Barbara given the full name Ms. Barbara J Jensen, III.)
-	MiddleName      string `json:"middleName"`      //MiddleName is the middle name(s) of the User (e.g. Robert given the full name Ms. Barbara J Jensen, III.).
-	HonorificPrefix string `json:"honorificPrefix"` //HonorificPrevix is the honorific prefix(es) of the User, or Title in most Western languages (e.g. Ms. given the full name Ms. Barbara J Jensen, III.)
-	HonorificSuffix string `json:"honorificSuffix"` //HonorificSuffix is the honorific suffix(es) of the User, or Suffix in most Western languages (e.g. III. given the full name Ms. Barbara J Jensen, III.)
+	Formatted       string `json:"formatted"`                 //Formatted is the full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g. Ms. Barbara J Jensen, III.)
+	FamilyName      string `json:"familyName"`                //FamilyName is the family name of the User, or Last Name in most Western languages (e.g. Jensen given the full name Ms. Barbara J Jensen, III.)
+	GivenName       string `json:"givenName"`                 //GiveName is the given name of the User, or First Name in most Western languages (e.g. Barbara given the full name Ms. Barbara J Jensen, III.)
+	MiddleName      string `json:"middleName"`                //MiddleName is the middle name(s) of the User (e.g. Robert given the full name Ms. Barbara J Jensen, III.).
+	HonorificPrefix string `json:"honorificPrefix,omitempty"` //HonorificPrevix is the honorific prefix(es) of the User, or Title in most Western languages (e.g. Ms. given the full name Ms. Barbara J Jensen, III.)
+	HonorificSuffix string `json:"honorificSuffix,omitempty"` //HonorificSuffix is the honorific suffix(es) of the User, or Suffix in most Western languages (e.g. III. given the full name Ms. Barbara J Jensen, III.)
 }
 
 //PhoneNumber provides an RFC3966 compliant phone number in the StringMultivalued.Value field.
@@ -106,7 +108,7 @@ func (u User) ResourceType() ResourceType {
 }
 
 func (u *User) MarshalJSON() ([]byte, error) {
-	return Marshal(u)
+	return jap.Marshal(u)
 }
 
 func (u *User) UnmarshalJSON(json []byte) error {
