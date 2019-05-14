@@ -52,6 +52,7 @@ type CommonAttributes struct {
 }
 
 //Meta is a complex attribute containing resource metadata.
+//https://tools.ietf.org/html/rfc7643#section-3.1
 type Meta struct {
 	ResourceType string    `json:"resourceType"`
 	Created      time.Time `json:"created,string"`
