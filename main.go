@@ -15,7 +15,7 @@ package main
 //- SCIM_SERVICE_URL
 
 import (
-	"encoding/json"
+	"github.com/PennState/go-additional-properties/pkg/json"
 
 	"github.com/PennState/golang_scimclient/scim"
 	"github.com/onrik/logrus/filename"
