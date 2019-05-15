@@ -48,7 +48,7 @@ type CommonAttributes struct {
 	ExternalID           string                     `json:"externalId"`
 	Meta                 Meta                       `json:"meta"`
 	Schemas              []string                   `json:"schemas"`
-	additionalProperties map[string]json.RawMessage `json:"*"`
+	AdditionalProperties map[string]json.RawMessage `json:"*"`
 }
 
 //Meta is a complex attribute containing resource metadata.
@@ -81,12 +81,12 @@ type StringMultivalued struct {
 //
 
 func (ca *CommonAttributes) addAdditionalProperties(additionalProperties map[string]json.RawMessage) {
-	ca.additionalProperties = additionalProperties
-	log.Debugf("Saved additional properties: %v", ca.additionalProperties)
+	ca.AdditionalProperties = additionalProperties
+	log.Debugf("Saved additional properties: %v", ca.AdditionalProperties)
 }
 
 func (ca CommonAttributes) getAdditionalProperties() map[string]json.RawMessage {
-	return ca.additionalProperties
+	return ca.AdditionalProperties
 }
 
 func (ca CommonAttributes) getID() string {
@@ -112,7 +112,7 @@ func (ca *CommonAttributes) AddExtension(extension Extension) error {
 //by the Extension's URN.
 func (ca *CommonAttributes) GetExtension(extension Extension) error {
 	name := extension.URN()
-	err := json.Unmarshal(ca.additionalProperties[name], extension)
+	err := json.Unmarshal(ca.AdditionalProperties[name], extension)
 	return err
 }
 
@@ -120,8 +120,8 @@ func (ca *CommonAttributes) GetExtension(extension Extension) error {
 //map that start with "urn:".  Clearly this is not a perfect way to
 //guarantee that the RawMessage stored in that key is an extension.
 func (ca *CommonAttributes) GetExtensionURNs() []string {
-	keys := make([]string, 0, len(ca.additionalProperties))
-	for key := range ca.additionalProperties {
+	keys := make([]string, 0, len(ca.AdditionalProperties))
+	for key := range ca.AdditionalProperties {
 		log.Debugf("Incoming key: %s", key)
 		if strings.HasPrefix(key, "urn:") {
 			log.Debugf("Saved key: %s", key)
@@ -141,7 +141,7 @@ func (ca *CommonAttributes) HasExtension(extension Extension) bool {
 //HasExtensionByURN indicates whether the passed URN string is a key in
 //the additionalProperties map.
 func (ca *CommonAttributes) HasExtensionByURN(urn string) bool {
-	_, exists := ca.additionalProperties[urn]
+	_, exists := ca.AdditionalProperties[urn]
 	return exists
 }
 
@@ -152,7 +152,7 @@ func (ca *CommonAttributes) putExtension(extension Extension) error {
 	rawMessage, err = json.Marshal(extension)
 
 	if err == nil {
-		ca.additionalProperties[urn] = rawMessage
+		ca.AdditionalProperties[urn] = rawMessage
 	}
 
 	return nil
@@ -167,7 +167,7 @@ func (ca *CommonAttributes) RemoveExtension(extension Extension) {
 //RemoveExtensionByURN deletes the RawMessage with the key matching
 //the passed URN from the additionalProperties map.
 func (ca *CommonAttributes) RemoveExtensionByURN(urn string) {
-	delete(ca.additionalProperties, urn)
+	delete(ca.AdditionalProperties, urn)
 }
 
 //UpdateExtension changes an existing SCIM extension already stored in a SCIM
