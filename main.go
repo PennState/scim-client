@@ -7,16 +7,19 @@ package main
 //	go build -o clienttest .
 //	./clienttest
 //
+//Or simply run it in a single step if you don't need an executable
+//
+//	go run main.go
+//
 //Required env variables are:
 //
-//- OAUTH_SERVICE_URL
+//- OAUTH_TOKEN_URL
 //- OAUTH_CLIENT_ID
 //- OAUTH_CLIENT_SECRET
 //- SCIM_SERVICE_URL
 
 import (
 	"github.com/PennState/go-additional-properties/pkg/json"
-
 	"github.com/PennState/golang_scimclient/scim"
 	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
@@ -31,8 +34,9 @@ func main() {
 		return
 	}
 
-	// Returns a SCIM user by id
+	// Retrieve a SCIM user by id
 
+	log.Info("===== Retrieve a SCIM user by id =====")
 	var user scim.User
 	err = sClient.RetrieveResource(&user, "9991533")
 	if err != nil {
