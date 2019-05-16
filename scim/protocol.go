@@ -2,6 +2,7 @@ package scim
 
 import (
 	"encoding/json"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +17,10 @@ type ErrorResponse struct {
 	ScimType string   `json:"scimType"` //ScimType is a detail error keyword.  See Table 9.
 	Detail   string   `json:"detail"`   //Detail is a human-readable message.
 	Status   string   `json:"status"`   //Status is the HTTP status code expressed as a JSON string.
+}
+
+func (er ErrorResponse) Error() string {
+	return fmt.Sprintf("%v", er)
 }
 
 const ListResponseURN = "urn:ietf:params:scim:api:messages:2.0:ListResponse"
