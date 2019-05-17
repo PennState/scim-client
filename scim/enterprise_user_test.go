@@ -49,7 +49,7 @@ func TestEnterpriseUserUnmarshaling(t *testing.T) {
 	assert.Len(user.Schemas, 2)
 	assert.Equal("urn:ietf:params:scim:schemas:core:2.0:User", user.Schemas[0])
 	assert.Equal("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", user.Schemas[1])
-	assert.Len(user.additionalProperties, 1, "Error! There should be exactly one SCIM extension")
+	assert.Len(user.AdditionalProperties, 1, "Error! There should be exactly one SCIM extension")
 
 	var enterpriseUser EnterpriseUser
 	err = user.GetExtension(&enterpriseUser)

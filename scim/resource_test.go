@@ -68,10 +68,10 @@ func getResourceWithAdditionalProperties() CommonAttributes {
 	var ca CommonAttributes
 
 	ca.ID = "2819c223-7f76-453a-919d-413861904646"
-	ca.additionalProperties = make(map[string]json.RawMessage)
-	ca.additionalProperties["urn:fake.extension"] = json.RawMessage(`{"name": "Fake Extension"}`)
-	ca.additionalProperties["additionalPropertiesOne"] = json.RawMessage(`"additionalPropertiesOne"`)
-	ca.additionalProperties["additionalPropertiesTwo"] = json.RawMessage(`"additionalPropertiesTwo"`)
+	ca.AdditionalProperties = make(map[string]json.RawMessage)
+	ca.AdditionalProperties["urn:fake.extension"] = json.RawMessage(`{"name": "Fake Extension"}`)
+	ca.AdditionalProperties["additionalPropertiesOne"] = json.RawMessage(`"additionalPropertiesOne"`)
+	ca.AdditionalProperties["additionalPropertiesTwo"] = json.RawMessage(`"additionalPropertiesTwo"`)
 	return ca
 }
 
@@ -81,16 +81,16 @@ func TestAddExtension(t *testing.T) {
 	resource := getResourceWithAdditionalProperties()
 	var fakeExtension fakeExtension
 	var worthlessExtension worthlessExtension
-	require.Len(resource.additionalProperties, 3)
+	require.Len(resource.AdditionalProperties, 3)
 
 	err := resource.AddExtension(&fakeExtension)
 	assert.NotNil(err)
-	assert.Len(resource.additionalProperties, 3)
+	assert.Len(resource.AdditionalProperties, 3)
 
 	err = resource.AddExtension(&worthlessExtension)
 	assert.Nil(err)
-	assert.Len(resource.additionalProperties, 4)
-	value, exists := resource.additionalProperties["urn:worthless.extension"]
+	assert.Len(resource.AdditionalProperties, 4)
+	value, exists := resource.AdditionalProperties["urn:worthless.extension"]
 	assert.True(exists)
 	assert.Equal(json.RawMessage("{}"), value)
 }
@@ -112,7 +112,7 @@ func TestGetExtensionURNs(t *testing.T) {
 	assert.Len(urns, 1)
 	assert.Equal("urn:fake.extension", urns[0])
 
-	resource.additionalProperties["urn:worthless.extension"] = json.RawMessage("{}")
+	resource.AdditionalProperties["urn:worthless.extension"] = json.RawMessage("{}")
 	urns = resource.GetExtensionURNs()
 	assert.Len(urns, 2)
 	sort.Strings(urns)
@@ -134,11 +134,11 @@ func TestRemoveExtension(t *testing.T) {
 	require := require.New(t)
 	resource := getResourceWithAdditionalProperties()
 	var fakeExtension fakeExtension
-	require.Len(resource.additionalProperties, 3)
+	require.Len(resource.AdditionalProperties, 3)
 
 	resource.RemoveExtension(&fakeExtension)
-	assert.Len(resource.additionalProperties, 2)
-	_, exists := resource.additionalProperties["urn:fake.extension"]
+	assert.Len(resource.AdditionalProperties, 2)
+	_, exists := resource.AdditionalProperties["urn:fake.extension"]
 	assert.False(exists)
 }
 
@@ -150,7 +150,7 @@ func TestUpdateExtension(t *testing.T) {
 
 	err := resource.UpdateExtension(&fakeExtension)
 	assert.Nil(err)
-	value, exists := resource.additionalProperties["urn:fake.extension"]
+	value, exists := resource.AdditionalProperties["urn:fake.extension"]
 	assert.True(exists)
 	assert.Equal(json.RawMessage(`{"name":"Updated Fake Extension"}`), value)
 
@@ -183,7 +183,7 @@ func TestResourceMarshaling(t *testing.T) {
 	assert.Equal("{\"name\":\"Fake Extension\"}", string(obj["urn:fake.extension"]))
 	assert.Equal("\"additionalPropertiesOne\"", string(obj["additionalPropertiesOne"]))
 	assert.Equal("\"additionalPropertiesTwo\"", string(obj["additionalPropertiesTwo"]))
-	meta := "{\"resourceType\":\"\",\"created\":\"0001-01-01T00:00:00Z\",\"lastModified\":\"0001-01-01T00:00:00Z\",\"location\":\"\",\"version\":\"\"}"
+	meta := "{\"created\":\"0001-01-01T00:00:00Z\",\"lastModified\":\"0001-01-01T00:00:00Z\",\"location\":\"\",\"resourceType\":\"\",\"version\":\"\"}"
 	assert.Equal(meta, string(obj["meta"]))
 }
 
