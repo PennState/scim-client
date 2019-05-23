@@ -196,6 +196,16 @@ func (c Client) RetrieveResource(res Resource, id string) error {
 	}
 	log.Debugf("Body: %s", body)
 
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var er ErrorResponse
+		err = json.Unmarshal(body, &er)
+		if err != nil {
+			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
+			return err
+		}
+		return er
+	}
+
 	return Unmarshal(body, res)
 }
 
@@ -257,7 +267,20 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 	return lr, nil
 }
 
-//func (c Client) CreateResource(res *Resource) error
+//CreateResource ..
+func (c Client) CreateResource(res Resource) error {
+	log.Info("(c Client) ReplaceResource(res)")
+	rj, err := json.Marshal(res)
+	if err != nil {
+		return err
+	}
+	log.Info("Marshaled resource: ", string(rj))
+
+	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
+	resp, err := c.hClient.Post(path, "application/scim+json", bytes.NewReader(rj))
+	log.Info(resp)
+	return nil
+}
 
 //ReplaceResource ..
 func (c Client) ReplaceResource(res Resource) error {
@@ -374,6 +397,8 @@ func (c Client) SearchResourcesByExternalID(rt ResourceType, externalID string) 
 //
 //SCIM client code
 //
+
+//type ScimError
 
 //
 //General HTTP client code
