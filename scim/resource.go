@@ -146,6 +146,10 @@ func (ca *CommonAttributes) HasExtensionByURN(urn string) bool {
 }
 
 func (ca *CommonAttributes) putExtension(extension Extension) error {
+	if ca.AdditionalProperties == nil {
+		ca.AdditionalProperties = make(map[string]json.RawMessage)
+	}
+
 	urn := extension.URN()
 	var err error
 	var rawMessage json.RawMessage

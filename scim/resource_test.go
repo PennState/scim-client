@@ -95,6 +95,16 @@ func TestAddExtension(t *testing.T) {
 	assert.Equal(json.RawMessage("{}"), value)
 }
 
+func TestAddAndUpdateExtensionWithEmptyResource(t *testing.T) {
+	var ca CommonAttributes
+	var fakeExtension fakeExtension
+	var worthlessExtension worthlessExtension
+	assert.NoError(t, ca.AddExtension(fakeExtension))
+	assert.NoError(t, ca.AddExtension(worthlessExtension))
+	assert.NoError(t, ca.UpdateExtension(&fakeExtension))
+	assert.NoError(t, ca.UpdateExtension(&worthlessExtension))
+}
+
 func TestGetExtension(t *testing.T) {
 	assert := assert.New(t)
 	resource := getResourceWithAdditionalProperties()
@@ -102,6 +112,14 @@ func TestGetExtension(t *testing.T) {
 	var fakeExtension fakeExtension
 	err := resource.GetExtension(&fakeExtension)
 	assert.Nil(err)
+}
+
+func TestGetExtensionWithEmptyResource(t *testing.T) {
+	var ca CommonAttributes
+	var fakeExtension fakeExtension
+	var worthlessExtension worthlessExtension
+	assert.Error(t, ca.GetExtension(&fakeExtension))
+	assert.Error(t, ca.GetExtension(&worthlessExtension))
 }
 
 func TestGetExtensionURNs(t *testing.T) {
@@ -127,6 +145,14 @@ func TestHasExtension(t *testing.T) {
 
 	assert.True(resource.HasExtension(fakeExtension))
 	assert.False(resource.HasExtension(worthlessExtension))
+}
+
+func TestHasExtensionWithEmptyResource(t *testing.T) {
+	var ca CommonAttributes
+	var fakeExtension fakeExtension
+	var worthlessExtension worthlessExtension
+	assert.False(t, ca.HasExtension((fakeExtension)))
+	assert.False(t, ca.HasExtension(worthlessExtension))
 }
 
 func TestRemoveExtension(t *testing.T) {
