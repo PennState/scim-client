@@ -28,7 +28,7 @@ import (
 func main() {
 	log.AddHook(filename.NewHook())
 
-	sClient, err := scim.NewOAuthClientFromEnv()
+	sClient, err := NewOAuthClientFromEnv()
 	if err != nil {
 		log.Error(err)
 		return
