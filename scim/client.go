@@ -8,78 +8,53 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"text/tabwriter"
 
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
 //
 //SCIM client configuration
 //
 
-const sEnvPrefix = "scim"
+const envPrefix = "scim"
 
 //ClientConfig ..
-type ClientConfig struct {
+type clientCfg struct {
 	ServiceURL       string `split_words:"true" required:"true"` //ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
 	IgnoreRedirects  bool   `split_words:"true" default:"false"`
 	DisableDiscovery bool   `split_words:"true" default:"false"`
 	DisableEtag      bool   `split_words:"true" default:"false"`
 }
 
-//NewDefaultClientConfig ..
-func NewDefaultClientConfig(serviceURL string) *ClientConfig {
-	var sCfg ClientConfig
-	sCfg.ServiceURL = serviceURL
-	return &sCfg
-}
-
-//NewClientConfigFromEnv ..
-func NewClientConfigFromEnv() (*ClientConfig, error) {
-	var sCfg ClientConfig
-	err := envconfig.Process(sEnvPrefix, &sCfg)
-	return &sCfg, err
-}
-
-func clientConfigUsage(sCfg *ClientConfig) error {
-	return envconfig.Usage(sEnvPrefix, sCfg)
-}
-
-var sEnvSpec = envSpec{
-	prefix: sEnvPrefix,
-	spec:   new(ClientConfig),
-}
-
 //
-//OAuth2 configuration
+//SCIM client options
 //
 
-const oEnvPrefix = "oauth"
+type ClientOpt func(*clientCfg)
 
-//OAuthConfig holds the oauth parameters for API authentication
-type OAuthConfig struct {
-	TokenURL     string `split_words:"true" required:"true"`
-	ClientID     string `split_words:"true" required:"true"`
-	ClientSecret string `split_words:"true" required:"true"`
+// func ServiceUrl(serviceUrl string) ClientOpt {
+// 	return func(cfg *clientCfg) {
+// 		cfg.ServiceURL = serviceUrl
+// 	}
+// }
+
+func IgnoreRedirects(ignoreRedirects bool) ClientOpt {
+	return func(cfg *clientCfg) {
+		cfg.IgnoreRedirects = ignoreRedirects
+	}
 }
 
-//NewOAuthConfigFromEnv searches the environment to get the required oauth parameters
-func NewOAuthConfigFromEnv() (*OAuthConfig, error) {
-	var oCfg OAuthConfig
-	err := envconfig.Process(oEnvPrefix, &oCfg)
-	return &oCfg, err
+func DisableDiscovery(disableDiscovery bool) ClientOpt {
+	return func(cfg *clientCfg) {
+		cfg.DisableDiscovery = disableDiscovery
+	}
 }
 
-func oauthConfigUsage(oCfg *OAuthConfig) error {
-	return envconfig.Usage(oEnvPrefix, oCfg)
-}
-
-var oEnvSpec = envSpec{
-	prefix: oEnvPrefix,
-	spec:   new(OAuthConfig),
+func DisableEtag(disableEtag bool) ClientOpt {
+	return func(cfg *clientCfg) {
+		cfg.DisableEtag = disableEtag
+	}
 }
 
 //
@@ -87,92 +62,54 @@ var oEnvSpec = envSpec{
 //
 
 type client struct {
-	sCfg    *ClientConfig
-	hClient *http.Client
+	cfg  *clientCfg
+	http *http.Client
 }
 
 //Client allows request scim resources
 type Client struct {
-	client
+	*client
 }
 
 //
 //SCIM client constructors
 //
 
-//NewClient ..
-func NewClient(sCfg *ClientConfig, hClient *http.Client) (*Client, error) {
-	var sClient Client
-
-	//Validate that the URL is at least formatted correctly
-	_, err := url.Parse(sCfg.ServiceURL)
-	if err != nil {
-		return &sClient, err
+func NewClient(http *http.Client, url string, opts ...ClientOpt) (*Client, error) {
+	var cfg clientCfg
+	cfg.ServiceURL = url
+	for _, opt := range opts {
+		opt(&cfg)
 	}
-
-	sClient.hClient = hClient
-	sClient.sCfg = sCfg
-	return &sClient, err
+	return newClient(http, &cfg)
 }
 
-//NewClientFromEnv ..
-func NewClientFromEnv(hClient *http.Client) (*Client, error) {
-	sCfg, err := NewClientConfigFromEnv()
+func NewClientFromEnv(http *http.Client) (*Client, error) {
+	var cfg clientCfg
+	err := envconfig.Process(envPrefix, &cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	return NewClient(sCfg, hClient)
+	return newClient(http, &cfg)
 }
 
-// func NewClient(cfg *ClientConfig, http *http.Client)
-// func NewUnauthenticatedClient()
-// func NewUnauthenticatedClientFromEnv()
-// func NewBasicAuthClient()
-// func NewBasicAuthClientFromEnv()
+func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 
-//NewDefaultClient ..
-func NewDefaultClient(serviceURL string, hClient *http.Client) (*Client, error) {
-	var sCfg ClientConfig
-	sCfg.ServiceURL = serviceURL
-	return NewClient(&sCfg, hClient)
-}
-
-//NewDefaultClientFromEnv ..
-func NewDefaultClientFromEnv(httpClient *http.Client) {
-
-}
-
-//NewOAuthClient ..
-func NewOAuthClient(sCfg *ClientConfig, oCfg *OAuthConfig) (*Client, error) {
-	var ccc = clientcredentials.Config{
-		TokenURL:     oCfg.TokenURL,
-		ClientID:     oCfg.ClientID,
-		ClientSecret: oCfg.ClientSecret,
+	//Validate that the URL exists and is formatted correctly
+	if cfg.ServiceURL == "" {
+		return nil, errors.New("ServiceURL is a required configuration parameter")
 	}
-	hClient := ccc.Client(oauth2.NoContext)
-
-	return NewClient(sCfg, hClient)
-}
-
-//NewOAuthClientFromEnv ..
-func NewOAuthClientFromEnv() (*Client, error) {
-	sCfg, err1 := NewClientConfigFromEnv()
-	if err1 != nil {
-		log.Error(err1)
+	_, err := url.Parse(cfg.ServiceURL)
+	if err != nil {
+		return nil, errors.New("Provided service URL is not valid")
 	}
 
-	oCfg, err2 := NewOAuthConfigFromEnv()
-	if err2 != nil {
-		log.Error(err2)
-	}
-
-	if err1 != nil || err2 != nil {
-		usage(sEnvSpec, oEnvSpec)
-		return nil, errors.New("Failed to configure the SCIM client - see preceding messages for cause")
-	}
-
-	return NewOAuthClient(sCfg, oCfg)
+	return &Client{
+		client: &client{
+			http: http,
+			cfg:  cfg,
+		},
+	}, nil
 }
 
 //
@@ -181,10 +118,10 @@ func NewOAuthClientFromEnv() (*Client, error) {
 
 //RetrieveResource ..
 func (c Client) RetrieveResource(res Resource, id string) error {
-	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
+	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 
 	log.Debugf("Path: %s", path)
-	resp, err := c.hClient.Get(path)
+	resp, err := c.http.Get(path)
 	if err != nil {
 		return err
 	}
@@ -211,13 +148,13 @@ func (c Client) RetrieveResource(res Resource, id string) error {
 
 //SearchResource ..
 func (c Client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {
-	path := c.sCfg.ServiceURL + rt.Endpoint + "/.search"
+	path := c.cfg.ServiceURL + rt.Endpoint + "/.search"
 	return c.search(path, sr)
 }
 
 //SearchServer ..
 func (c Client) SearchServer(sr SearchRequest) (ListResponse, error) {
-	path := c.sCfg.ServiceURL + "/.search"
+	path := c.cfg.ServiceURL + "/.search"
 	return c.search(path, sr)
 }
 
@@ -236,7 +173,7 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 	}
 	log.Debug("SearchRequest JSON: ", string(srj))
 
-	resp, err := c.hClient.Post(path, "application/json", bytes.NewReader(srj))
+	resp, err := c.http.Post(path, "application/json", bytes.NewReader(srj))
 	if err != nil {
 		return lr, err
 	}
@@ -276,8 +213,11 @@ func (c Client) CreateResource(res Resource) error {
 	}
 	log.Info("Marshaled resource: ", string(rj))
 
-	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint
-	resp, err := c.hClient.Post(path, "application/scim+json", bytes.NewReader(rj))
+	path := c.cfg.ServiceURL + res.ResourceType().Endpoint
+	resp, err := c.http.Post(path, "application/scim+json", bytes.NewReader(rj))
+	if err != nil {
+		return err
+	}
 	log.Info(resp)
 	return nil
 }
@@ -291,18 +231,18 @@ func (c Client) ReplaceResource(res Resource) error {
 	}
 	log.Info("Marshaled resource: ", string(rj))
 
-	path := c.sCfg.ServiceURL + res.ResourceType().Endpoint + "/" + res.getID()
+	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + res.getID()
 	req, err := http.NewRequest("PUT", path, bytes.NewReader(rj))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/scim+json")
-	if !c.sCfg.DisableEtag {
+	if !c.cfg.DisableEtag {
 		req.Header.Set("If-Match", res.getMeta().Version)
 	}
 
-	resp, err := c.hClient.Do(req)
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -361,7 +301,7 @@ func (c Client) getServerDiscoveryResources(typ ResourceType, res interface{}) e
 
 func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 	log.Debugf("Type: %v", reflect.TypeOf(r))
-	resp, err := c.hClient.Get(c.sCfg.ServiceURL + r.ResourceType().Endpoint)
+	resp, err := c.http.Get(c.cfg.ServiceURL + r.ResourceType().Endpoint)
 	if err != nil {
 		return err
 	}
@@ -409,43 +349,4 @@ func getStringEntityBody(resp *http.Response) ([]byte, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	log.Debugf("Body: %s", body)
 	return body, err
-}
-
-//
-//Error reporting for envconfig
-//
-
-const (
-	multipleTableInstructionHeader = `The method call you've chosen causes this this library to be configured via the
-environment. The following environment variables can be (or in the case of required
-parameters must be) used:
-`
-
-	multipleTableFormatHeader = `
-KEY	TYPE	DEFAULT	REQUIRED	DESCRIPTION
----	----	-------	--------	-----------
-`
-
-	multipleTableFormatTemplate = `{{range .}}{{usage_key .}}	{{usage_type .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
-{{end}}`
-)
-
-type envSpec struct {
-	prefix string
-	spec   interface{}
-}
-
-type empty struct {
-}
-
-func usage(specs ...envSpec) {
-	buf := new(bytes.Buffer)
-	buf.WriteString(multipleTableInstructionHeader)
-	tabs := tabwriter.NewWriter(buf, 1, 0, 4, ' ', 0)
-	envconfig.Usagef("", new(empty), tabs, multipleTableFormatHeader)
-	for _, spec := range specs {
-		envconfig.Usagef(spec.prefix, spec.spec, tabs, multipleTableFormatTemplate)
-	}
-	tabs.Flush()
-	log.Info(buf)
 }
