@@ -1,6 +1,6 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-github.com/PennState/go-additional-properties v0.0.0-20190515202748-612df1fd5030 h1:/JLLhF/SQAjbmUI0e3SjPqJzlfXxQOS8yBSk0H6FVr0=
-github.com/PennState/go-additional-properties v0.0.0-20190515202748-612df1fd5030/go.mod h1:5RNQuDj9e/xOmdSKq/bYTnqVAwb0unrKhxBB9ntpWeA=
+github.com/PennState/go-additional-properties v0.1.0 h1:h/jjXTWg4QZ6c/12vJ2M6MBARudpQfzSDGLLy43d3Co=
+github.com/PennState/go-additional-properties v0.1.0/go.mod h1:5RNQuDj9e/xOmdSKq/bYTnqVAwb0unrKhxBB9ntpWeA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
