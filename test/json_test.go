@@ -39,39 +39,6 @@ var enterpriseUser scim.User = scim.User{
 	UserName: "bjensen@example.com",
 }
 
-var group scim.Group = scim.Group{
-	CommonAttributes: scim.CommonAttributes{
-		Schemas: []string{
-			"urn:ietf:params:scim:schemas:core:2.0:Group",
-		},
-		ID: "e9e30dba-f08f-4109-8486-d5c6a331660a",
-		Meta: scim.Meta{
-			ResourceType: "Group",
-			Created:      parseTime("2010-01-23T04:56:22Z"),
-			LastModified: parseTime("2011-05-13T04:42:34Z"),
-			Version:      "W/\"3694e05e9dff592\"",
-			Location:     "https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a",
-		},
-	},
-	DisplayName: "Tour Guides",
-	Members: []scim.MemberRef{
-		scim.MemberRef{
-			Multivalued: scim.Multivalued{
-				Reference: "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646",
-				Display:   "Babs Jensen",
-			},
-			Value: "2819c223-7f76-453a-919d-413861904646",
-		},
-		scim.MemberRef{
-			Multivalued: scim.Multivalued{
-				Reference: "https://example.com/v2/Users/902c246b-6245-4190-8e05-00816be7344a",
-				Display:   "Mandy Pepperidge",
-			},
-			Value: "902c246b-6245-4190-8e05-00816be7344a",
-		},
-	},
-}
-
 var fullUser scim.User = scim.User{
 	CommonAttributes: scim.CommonAttributes{
 		Schemas: []string{
@@ -208,6 +175,39 @@ var fullUser scim.User = scim.User{
 	X509Certificates: []scim.X509Certificate{
 		scim.X509Certificate{
 			Value: "MIIDQzCCAqygAwIBAgICEAAwDQYJKoZIhvcNAQEFBQAwTjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFDASBgNVBAoMC2V4YW1wbGUuY29tMRQwEgYDVQQDDAtleGFtcGxlLmNvbTAeFw0xMTEwMjIwNjI0MzFaFw0xMjEwMDQwNjI0MzFaMH8xCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRQwEgYDVQQKDAtleGFtcGxlLmNvbTEhMB8GA1UEAwwYTXMuIEJhcmJhcmEgSiBKZW5zZW4gSUlJMSIwIAYJKoZIhvcNAQkBFhNiamVuc2VuQGV4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Kr+Dcds/JQ5GwejJFcBIP682X3xpjis56AK02bc1FLgzdLI8auoR+cC9/Vrh5t66HkQIOdA4unHh0AaZ4xL5PhVbXIPMB5vAPKpzz5iPSi8xO8SL7I7SDhcBVJhqVqr3HgllEG6UClDdHO7nkLuwXq8HcISKkbT5WFTVfFZzidPl8HZ7DhXkZIRtJwBweq4bvm3hM1Os7UQH05ZS6cVDgweKNwdLLrT51ikSQG3DYrl+ft781UQRIqxgwqCfXEuDiinPh0kkvIi5jivVu1Z9QiwlYEdRbLJ4zJQBmDrSGTMYn4lRc2HgHO4DqB/bnMVorHB0CC6AV1QoFK4GPe1LwIDAQABo3sweTAJBgNVHRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBDZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQU8pD0U0vsZIsaA16lL8En8bx0F/gwHwYDVR0jBBgwFoAUdGeKitcaF7gnzsNwDx708kqaVt0wDQYJKoZIhvcNAQEFBQADgYEAA81SsFnOdYJtNg5Tcq+/ByEDrBgnusx0jloUhByPMEVkoMZ3J7j1ZgI8rAbOkNngX8+pKfTiDz1RC4+dx8oU6Za+4NJXUjlL5CvV6BEYb1+QAEJwitTVvxB/A67g42/vzgAtoRUeDov1+GFiBZ+GNF/cAYKcMtGcrs2i97ZkJMo=",
+		},
+	},
+}
+
+var group scim.Group = scim.Group{
+	CommonAttributes: scim.CommonAttributes{
+		Schemas: []string{
+			"urn:ietf:params:scim:schemas:core:2.0:Group",
+		},
+		ID: "e9e30dba-f08f-4109-8486-d5c6a331660a",
+		Meta: scim.Meta{
+			ResourceType: "Group",
+			Created:      parseTime("2010-01-23T04:56:22Z"),
+			LastModified: parseTime("2011-05-13T04:42:34Z"),
+			Version:      "W/\"3694e05e9dff592\"",
+			Location:     "https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a",
+		},
+	},
+	DisplayName: "Tour Guides",
+	Members: []scim.MemberRef{
+		scim.MemberRef{
+			Multivalued: scim.Multivalued{
+				Reference: "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646",
+				Display:   "Babs Jensen",
+			},
+			Value: "2819c223-7f76-453a-919d-413861904646",
+		},
+		scim.MemberRef{
+			Multivalued: scim.Multivalued{
+				Reference: "https://example.com/v2/Users/902c246b-6245-4190-8e05-00816be7344a",
+				Display:   "Mandy Pepperidge",
+			},
+			Value: "902c246b-6245-4190-8e05-00816be7344a",
 		},
 	},
 }

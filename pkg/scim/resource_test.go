@@ -13,36 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const resourceJSON = `{
-	"id": "2819c223-7f76-453a-919d-413861904646",
-	"externalId": "43496746-7739-460b-bf99-3421f2970687",
-	"meta": {
-		"resourceType": "User",
-		"created": "2010-01-23T04:56:22Z",
-		"lastModified": "2011-05-13T04:42:34Z",
-		"version": "W/3694e05e9dff590",
-		"location": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646"
-	}
-}`
-
-const resourceWithAdditionalPropertiesJSON = `
-{
-	"id": "2819c223-7f76-453a-919d-413861904646",
-	"externalId": "43496746-7739-460b-bf99-3421f2970687",
-	"meta": {
-		"resourceType": "User",
-		"created": "2010-01-23T04:56:22Z",
-		"lastModified": "2011-05-13T04:42:34Z",
-		"version": "W/3694e05e9dff590",
-		"location": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646"
-	},
-	"urn:fake.extension": {
-		"urn": "Fake Extension"
-	},
-	"additionalPropertyOne": "additionalPropertyOne",
-	"additionalPropertyTwo": "additionalPropertyTwo"
-}`
-
 type fakeExtension struct {
 	Name string `json:"name"`
 }
