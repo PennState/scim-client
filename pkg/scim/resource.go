@@ -45,10 +45,10 @@ type Extension Named
 //https://tools.ietf.org/html/rfc7643#section-3.1
 type CommonAttributes struct {
 	ID                   string                     `json:"id"`
-	ExternalID           string                     `json:"externalId"`
+	ExternalID           string                     `json:"externalId,omitempty"`
 	Meta                 Meta                       `json:"meta"`
 	Schemas              []string                   `json:"schemas"`
-	AdditionalProperties map[string]json.RawMessage `json:"*"`
+	AdditionalProperties map[string]json.RawMessage `json:"*,omitempty"`
 }
 
 //Meta is a complex attribute containing resource metadata.
@@ -64,10 +64,10 @@ type Meta struct {
 //Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
 //https://tools.ietf.org/html/rfc7643#section-2.4
 type Multivalued struct {
-	Type      string `json:"type"`    //Type is a label indicating the attribute's function; e.g., 'work' or 'home'.
-	Display   string `json:"display"` //Display is a  human readable name, primarily used for display purposes. READ-ONLY.
-	Primary   bool   `json:"primary"` //Primary is a boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred mailing address or primary e-mail address. The primary attribute value 'true' MUST appear no more than once.
-	Reference string `json:"$ref"`    //Reference is the reference URI of a target resource, if the attribute is a reference.
+	Type      string `json:"type,omitempty"`    //Type is a label indicating the attribute's function; e.g., 'work' or 'home'.
+	Display   string `json:"display,omitempty"` //Display is a  human readable name, primarily used for display purposes. READ-ONLY.
+	Primary   bool   `json:"primary,omitempty"` //Primary is a boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred mailing address or primary e-mail address. The primary attribute value 'true' MUST appear no more than once.
+	Reference string `json:"$ref,omitempty"`    //Reference is the reference URI of a target resource, if the attribute is a reference.
 }
 
 //StringMultivalued provides a base structure for simple string multi-valued attributes.
