@@ -3,7 +3,7 @@ package examples
 import (
 	"testing"
 
-	"github.com/PennState/golang_scimclient/scim"
+	"github.com/PennState/golang_scimclient/pkg/scim"
 	"github.com/stretchr/testify/assert"
 )
 

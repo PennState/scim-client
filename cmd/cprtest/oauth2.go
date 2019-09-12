@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/PennState/golang_scimclient/scim"
+	"github.com/PennState/golang_scimclient/pkg/scim"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"

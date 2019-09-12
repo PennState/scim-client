@@ -1,6 +1,9 @@
 package examples
 
-import "github.com/PennState/golang_scimclient/scim"
+import (
+	jap "github.com/PennState/go-additional-properties/pkg/json"
+	"github.com/PennState/golang_scimclient/pkg/scim"
+)
 
 //Organization represents some hierarchy of an arbitrary organization
 //including (URI) an optional reference to a parent organization as well
@@ -50,7 +53,7 @@ func (o Organization) ResourceType() scim.ResourceType {
 }
 
 func (o *Organization) MarshalJSON() ([]byte, error) {
-	return scim.Marshal(o)
+	return jap.Marshal(o)
 }
 
 func (o *Organization) UnmarshalJSON(json []byte) error {
