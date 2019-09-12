@@ -41,7 +41,7 @@ func (g Group) URN() string {
 }
 
 //ResourceType returns the default structure describing the availability
-//of the User resource and, together with URN() identifies this code as
+//of the Group resource and, together with URN() identifies this code as
 //implementing the Resource interface.
 func (g Group) ResourceType() ResourceType {
 	return GroupResourceType
