@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/PennState/golang_scimclient/examples"
 	"github.com/PennState/golang_scimclient/pkg/scim"
 	"github.com/PennState/proctor/pkg/goldenfile"
 	"github.com/stretchr/testify/assert"
@@ -227,6 +228,28 @@ var minimalUser scim.User = scim.User{
 	UserName: "bjensen@example.com",
 }
 
+var organization examples.Organization = examples.Organization{
+	CommonAttributes: scim.CommonAttributes{
+		Schemas: []string{"urn:com:example:2.0:Organization"},
+		ID:      "430beb5c-a361-4c04-b308-2845789a496e",
+		Meta: scim.Meta{
+			ResourceType: "Organization",
+			Created:      parseTime("2010-01-23T04:56:22Z"),
+			LastModified: parseTime("2011-05-13T04:42:34Z"),
+			Version:      "W/\"3694e05e9dff590\"",
+			Location:     "https://example.com/v2/Organizations/430beb5c-a361-4c04-b308-2845789a496e",
+		},
+	},
+	Name:   "Tour Promotion",
+	Type:   "Department",
+	Parent: "../Organizations/4a7741a3-a436-4a52-a6d5-149e6c1b9578",
+	Children: []examples.OrganizationReference{
+		"../Organizations/7eb59c46-35a4-4443-b8c1-5de8be88f973",
+		"../Organizations/66506f29-8c44-414e-b52d-a993b94f370c",
+		"../Organizations/0a365d4f-10e5-45c5-ae05-ee5184b59627",
+	},
+}
+
 func TestResourceMarshalingAndUnmarshaling(t *testing.T) {
 	tests := []struct {
 		Name         string
@@ -238,6 +261,7 @@ func TestResourceMarshalingAndUnmarshaling(t *testing.T) {
 		{"Group", "group.json", &scim.Group{}, &group},
 		{"Full user", "fulluser.json", &scim.User{}, &fullUser},
 		{"Minimal user", "minimaluser.json", &scim.User{}, &minimalUser},
+		{"Organization", "organization.json", &examples.Organization{}, &organization},
 	}
 	for _, test := range tests {
 		fp := goldenfile.GetDefaultFilePath(test.GoldenFile)
