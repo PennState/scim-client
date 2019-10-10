@@ -1,4 +1,4 @@
-module github.com/PennState/golang_scimclient
+module github.com/PennState/scim-client
 
 require (
 	github.com/PennState/go-additional-properties v0.1.0
