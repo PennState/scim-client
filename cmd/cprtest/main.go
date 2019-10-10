@@ -20,7 +20,7 @@ package main
 
 import (
 	"github.com/PennState/go-additional-properties/pkg/json"
-	"github.com/PennState/golang_scimclient/pkg/scim"
+	"github.com/PennState/scim-client/pkg/scim"
 	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
 )

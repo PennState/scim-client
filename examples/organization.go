@@ -2,7 +2,7 @@ package examples
 
 import (
 	jap "github.com/PennState/go-additional-properties/pkg/json"
-	"github.com/PennState/golang_scimclient/pkg/scim"
+	"github.com/PennState/scim-client/pkg/scim"
 )
 
 //Organization represents some hierarchy of an arbitrary organization

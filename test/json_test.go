@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PennState/golang_scimclient/examples"
-	"github.com/PennState/golang_scimclient/pkg/scim"
+	"github.com/PennState/scim-client/examples"
+	"github.com/PennState/scim-client/pkg/scim"
 	"github.com/PennState/proctor/pkg/goldenfile"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
