@@ -1,4 +1,4 @@
-# golang-scimclient - a SCIM [1] client for the Go [2] programming language
+# scim-client - a SCIM [1] client for the Go [2] programming language
 
 ## Features
 
