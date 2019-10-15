@@ -19,6 +19,8 @@ package main
 //- SCIM_SERVICE_URL
 
 import (
+	"context"
+
 	"github.com/PennState/go-additional-properties/pkg/json"
 	"github.com/PennState/scim-client/pkg/scim"
 	"github.com/onrik/logrus/filename"
@@ -27,7 +29,6 @@ import (
 
 func main() {
 	log.AddHook(filename.NewHook())
-
 	sClient, err := NewOAuthClientFromEnv()
 	if err != nil {
 		log.Error(err)
@@ -38,7 +39,7 @@ func main() {
 
 	log.Info("===== Retrieve a SCIM user by id =====")
 	var user scim.User
-	err = sClient.RetrieveResource(&user, "9991533")
+	err = sClient.RetrieveResource(context.TODO(), &user, "9991533")
 	if err != nil {
 		log.Error(err)
 	}
@@ -58,7 +59,7 @@ func main() {
 	sr := scim.SearchRequest{
 		Filter: "externalId SW \"972806\"", // 9991533 has PSU Id 972806446
 	}
-	lr, err := sClient.SearchResource(scim.UserResourceType, sr)
+	lr, err := sClient.SearchResource(context.TODO(), scim.UserResourceType, sr)
 	if err != nil {
 		log.Error(err)
 	}
@@ -70,7 +71,7 @@ func main() {
 	// Search using the convenience methods
 
 	log.Info("===== Search using the convenience method - SearchUserResourcesByUserName =====")
-	lr, err = sClient.SearchUserResourcesByUserName("swm16")
+	lr, err = sClient.SearchUserResourcesByUserName(context.TODO(), "swm16")
 	if err != nil {
 		log.Error(err)
 	}
@@ -80,7 +81,7 @@ func main() {
 	}
 
 	log.Info("===== Search using the convenience method - SearchResourcesByExternalId =====")
-	lr, err = sClient.SearchResourcesByExternalID(scim.UserResourceType, "972806446")
+	lr, err = sClient.SearchResourcesByExternalID(context.TODO(), scim.UserResourceType, "972806446")
 	if err != nil {
 		log.Error(err)
 	}
@@ -93,7 +94,7 @@ func main() {
 
 	log.Info("===== ReplaceResource =====")
 	user.Name.GivenName = "Stephen"
-	err = sClient.ReplaceResource(&user)
+	err = sClient.ReplaceResource(context.TODO(), &user)
 	if err != nil {
 		log.Error(err)
 	}
@@ -111,7 +112,7 @@ func main() {
 
 	log.Info("===== List the server's resource types =====")
 	var resourceTypes []scim.ResourceType
-	resourceTypes, err = sClient.GetResourceTypes()
+	resourceTypes, err = sClient.GetResourceTypes(context.TODO())
 	if err != nil {
 		log.Error(err)
 	}
@@ -120,7 +121,7 @@ func main() {
 	// List the server's schemas
 
 	var schemas []scim.Schema
-	schemas, err = sClient.GetSchemas()
+	schemas, err = sClient.GetSchemas(context.TODO())
 	if err != nil {
 		log.Error(err)
 	}
@@ -129,7 +130,7 @@ func main() {
 	// List the server's service provider config
 
 	var cfg scim.ServiceProviderConfig
-	cfg, err = sClient.GetServerProviderConfig()
+	cfg, err = sClient.GetServerProviderConfig(context.TODO())
 	if err != nil {
 		log.Error(err)
 	}
