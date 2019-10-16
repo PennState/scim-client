@@ -20,7 +20,7 @@ type ErrorResponse struct {
 }
 
 func (er ErrorResponse) Error() string {
-	return fmt.Sprintf("%v", er)
+	return fmt.Sprintf("HTTP status: %v, Type: %v, Detail: %v", er.Status, er.ScimType, er.Detail)
 }
 
 const ListResponseURN = "urn:ietf:params:scim:api:messages:2.0:ListResponse"
