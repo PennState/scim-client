@@ -2,6 +2,7 @@ package scim
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -117,11 +118,15 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 //
 
 //RetrieveResource ..
-func (c Client) RetrieveResource(res Resource, id string) error {
+func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) error {
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 
 	log.Debugf("Path: %s", path)
-	resp, err := c.http.Get(path)
+	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -147,18 +152,18 @@ func (c Client) RetrieveResource(res Resource, id string) error {
 }
 
 //SearchResource ..
-func (c Client) SearchResource(rt ResourceType, sr SearchRequest) (ListResponse, error) {
+func (c Client) SearchResource(ctx context.Context, rt ResourceType, sr SearchRequest) (ListResponse, error) {
 	path := c.cfg.ServiceURL + rt.Endpoint + "/.search"
-	return c.search(path, sr)
+	return c.search(ctx, path, sr)
 }
 
 //SearchServer ..
-func (c Client) SearchServer(sr SearchRequest) (ListResponse, error) {
+func (c Client) SearchServer(ctx context.Context, sr SearchRequest) (ListResponse, error) {
 	path := c.cfg.ServiceURL + "/.search"
-	return c.search(path, sr)
+	return c.search(ctx, path, sr)
 }
 
-func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
+func (c Client) search(ctx context.Context, path string, sr SearchRequest) (ListResponse, error) {
 	log.Debug("Path: ", path)
 	var lr ListResponse
 
@@ -173,7 +178,12 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 	}
 	log.Debug("SearchRequest JSON: ", string(srj))
 
-	resp, err := c.http.Post(path, "application/json", bytes.NewReader(srj))
+	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(srj))
+	if err != nil {
+		return lr, err
+	}
+	req.Header.Set("Content-Type", "application/scim+json")
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return lr, err
 	}
@@ -205,7 +215,7 @@ func (c Client) search(path string, sr SearchRequest) (ListResponse, error) {
 }
 
 //CreateResource ..
-func (c Client) CreateResource(res Resource) error {
+func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	log.Info("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
 	if err != nil {
@@ -214,7 +224,12 @@ func (c Client) CreateResource(res Resource) error {
 	log.Info("Marshaled resource: ", string(rj))
 
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint
-	resp, err := c.http.Post(path, "application/scim+json", bytes.NewReader(rj))
+	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(rj))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/scim+json")
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -223,7 +238,7 @@ func (c Client) CreateResource(res Resource) error {
 }
 
 //ReplaceResource ..
-func (c Client) ReplaceResource(res Resource) error {
+func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	log.Info("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
 	if err != nil {
@@ -232,11 +247,10 @@ func (c Client) ReplaceResource(res Resource) error {
 	log.Info("Marshaled resource: ", string(rj))
 
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + res.getID()
-	req, err := http.NewRequest("PUT", path, bytes.NewReader(rj))
+	req, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(rj))
 	if err != nil {
 		return err
 	}
-
 	req.Header.Set("Content-Type", "application/scim+json")
 	if !c.cfg.DisableEtag {
 		req.Header.Set("If-Match", res.getMeta().Version)
@@ -277,31 +291,37 @@ func (c Client) ReplaceResource(res Resource) error {
 //Server Discovery
 //
 
-func (c Client) GetResourceTypes() ([]ResourceType, error) {
+func (c Client) GetResourceTypes(ctx context.Context) ([]ResourceType, error) {
 	var resourceTypes []ResourceType
-	err := c.getServerDiscoveryResources(ResourceTypeResourceType, resourceTypes)
+	err := c.getServerDiscoveryResources(ctx, ResourceTypeResourceType, resourceTypes)
 	return resourceTypes, err
 }
 
-func (c Client) GetSchemas() ([]Schema, error) {
+func (c Client) GetSchemas(ctx context.Context) ([]Schema, error) {
 	var schemas []Schema
-	err := c.getServerDiscoveryResources(SchemaResourceType, &schemas)
+	err := c.getServerDiscoveryResources(ctx, SchemaResourceType, &schemas)
 	return schemas, err
 }
 
-func (c Client) GetServerProviderConfig() (ServiceProviderConfig, error) {
+func (c Client) GetServerProviderConfig(ctx context.Context) (ServiceProviderConfig, error) {
 	var cfg ServiceProviderConfig
-	err := c.getServerDiscoveryResource(&cfg)
+	err := c.getServerDiscoveryResource(ctx, &cfg)
 	return cfg, err
 }
 
-func (c Client) getServerDiscoveryResources(typ ResourceType, res interface{}) error {
+func (c Client) getServerDiscoveryResources(ctx context.Context, typ ResourceType, res interface{}) error {
 	return nil
 }
 
-func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
+func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscoveryResource) error {
 	log.Debugf("Type: %v", reflect.TypeOf(r))
-	resp, err := c.http.Get(c.cfg.ServiceURL + r.ResourceType().Endpoint)
+	path := c.cfg.ServiceURL + r.ResourceType().Endpoint
+	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/scim+json")
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -319,19 +339,19 @@ func (c Client) getServerDiscoveryResource(r ServerDiscoveryResource) error {
 //
 
 //SearchUserResourcesByUserName is a helper method for retrieving resources by UserName
-func (c Client) SearchUserResourcesByUserName(userName string) (ListResponse, error) {
+func (c Client) SearchUserResourcesByUserName(ctx context.Context, userName string) (ListResponse, error) {
 	sr := SearchRequest{
 		Filter: "userName EQ \"" + userName + "\"",
 	}
-	return c.SearchResource(UserResourceType, sr)
+	return c.SearchResource(ctx, UserResourceType, sr)
 }
 
 //SearchResourcesByExternalID is a helper method for retrieving resources by ExternalId
-func (c Client) SearchResourcesByExternalID(rt ResourceType, externalID string) (ListResponse, error) {
+func (c Client) SearchResourcesByExternalID(ctx context.Context, rt ResourceType, externalID string) (ListResponse, error) {
 	sr := SearchRequest{
 		Filter: "externalId EQ \"" + externalID + "\"",
 	}
-	return c.SearchResource(rt, sr)
+	return c.SearchResource(ctx, rt, sr)
 }
 
 //
