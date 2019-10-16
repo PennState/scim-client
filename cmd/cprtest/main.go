@@ -59,7 +59,7 @@ func main() {
 	sr := scim.SearchRequest{
 		Filter: "externalId SW \"972806\"", // 9991533 has PSU Id 972806446
 	}
-	lr, err := sClient.SearchResource(context.TODO(), scim.UserResourceType, sr)
+	lr, err := sClient.QueryResourceType(context.TODO(), scim.UserResourceType, sr)
 	if err != nil {
 		log.Error(err)
 	}
@@ -71,7 +71,7 @@ func main() {
 	// Search using the convenience methods
 
 	log.Info("===== Search using the convenience method - SearchUserResourcesByUserName =====")
-	lr, err = sClient.SearchUserResourcesByUserName(context.TODO(), "swm16")
+	lr, err = sClient.QueryUserResourceTypeByUserName(context.TODO(), "swm16")
 	if err != nil {
 		log.Error(err)
 	}
@@ -81,7 +81,7 @@ func main() {
 	}
 
 	log.Info("===== Search using the convenience method - SearchResourcesByExternalId =====")
-	lr, err = sClient.SearchResourcesByExternalID(context.TODO(), scim.UserResourceType, "972806446")
+	lr, err = sClient.QueryResourceTypeByExternalID(context.TODO(), scim.UserResourceType, "972806446")
 	if err != nil {
 		log.Error(err)
 	}

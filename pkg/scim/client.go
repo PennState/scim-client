@@ -152,18 +152,18 @@ func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) e
 }
 
 //SearchResource ..
-func (c Client) SearchResource(ctx context.Context, rt ResourceType, sr SearchRequest) (ListResponse, error) {
+func (c Client) QueryResourceType(ctx context.Context, rt ResourceType, sr SearchRequest) (ListResponse, error) {
 	path := c.cfg.ServiceURL + rt.Endpoint + "/.search"
-	return c.search(ctx, path, sr)
+	return c.query(ctx, path, sr)
 }
 
 //SearchServer ..
-func (c Client) SearchServer(ctx context.Context, sr SearchRequest) (ListResponse, error) {
+func (c Client) QueryServer(ctx context.Context, sr SearchRequest) (ListResponse, error) {
 	path := c.cfg.ServiceURL + "/.search"
-	return c.search(ctx, path, sr)
+	return c.query(ctx, path, sr)
 }
 
-func (c Client) search(ctx context.Context, path string, sr SearchRequest) (ListResponse, error) {
+func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListResponse, error) {
 	log.Debug("Path: ", path)
 	var lr ListResponse
 
@@ -333,32 +333,6 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 
 	return json.Unmarshal(body, r)
 }
-
-//
-//Convenience methods
-//
-
-//SearchUserResourcesByUserName is a helper method for retrieving resources by UserName
-func (c Client) SearchUserResourcesByUserName(ctx context.Context, userName string) (ListResponse, error) {
-	sr := SearchRequest{
-		Filter: "userName EQ \"" + userName + "\"",
-	}
-	return c.SearchResource(ctx, UserResourceType, sr)
-}
-
-//SearchResourcesByExternalID is a helper method for retrieving resources by ExternalId
-func (c Client) SearchResourcesByExternalID(ctx context.Context, rt ResourceType, externalID string) (ListResponse, error) {
-	sr := SearchRequest{
-		Filter: "externalId EQ \"" + externalID + "\"",
-	}
-	return c.SearchResource(ctx, rt, sr)
-}
-
-//
-//SCIM client code
-//
-
-//type ScimError
 
 //
 //General HTTP client code
