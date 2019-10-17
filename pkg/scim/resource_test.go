@@ -223,6 +223,23 @@ func DefaultJsonMarshalling(t *testing.T) {
 func TestResourceUnmarshaling(t *testing.T) {
 	assert := assert.New(t)
 
+	const resourceJSON = `
+	{
+		"schemas": [
+			"urn:ietf:params:scim:schemas:core:2.0:User"
+		],
+		"id": "2819c223-7f76-453a-919d-413861904646",
+		"externalId": "43496746-7739-460b-bf99-3421f2970687",
+		"meta": {
+			"resourceType": "User",
+			"created": "2010-01-23T04:56:22Z",
+			"lastModified": "2011-05-13T04:42:34Z",
+			"version": "W/\"3694e05e9dff590\"",
+			"location": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646"
+		}
+	}
+	`
+
 	var ca CommonAttributes
 	error := Unmarshal([]byte(resourceJSON), &ca)
 
@@ -233,7 +250,7 @@ func TestResourceUnmarshaling(t *testing.T) {
 	assert.Equal(ca.Meta.ResourceType, "User")
 	assert.Equal(ca.Meta.Created, time.Date(2010, time.January, 23, 4, 56, 22, 0, time.UTC))
 	assert.Equal(ca.Meta.LastModified, time.Date(2011, time.May, 13, 4, 42, 34, 0, time.UTC))
-	assert.Equal(ca.Meta.Version, "W/3694e05e9dff590")
+	assert.Equal(ca.Meta.Version, "W/\"3694e05e9dff590\"")
 	assert.Equal(ca.Meta.Location, "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646")
 }
 
