@@ -1,6 +1,10 @@
 package scim
 
-import jap "github.com/PennState/go-additional-properties/pkg/json"
+import (
+	"github.com/PennState/additional-properties/pkg/ap"
+	jsoniter "github.com/json-iterator/go"
+	log "github.com/sirupsen/logrus"
+)
 
 //UserURN is the IANA registered SCIM name for the standardized SCIM
 //User.
@@ -18,7 +22,7 @@ type User struct {
 	Groups            []GroupRef        `json:"groups,omitempty"`            //Groups is a list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated")
 	IMs               []IM              `json:"ims,omitempty"`               //Ims are instant messaging addresses for the User.
 	Locale            string            `json:"locale,omitempty"`            //Locale is used to indicate the User's default location for purposes of localizing items such as currency, date time format, numerical representations, etc.
-	Name              Name              `json:"name,omitempty"`              //Name is the components of the user's real name. Providers MAY return just the full name as a single string in the formatted sub-attribute, or they MAY return just the individual component attributes using the other sub-attributes, or they MAY return both. If both variants are returned, they SHOULD be describing the same name, with the formatted name indicating how the component attributes should be combined.
+	Name              *Name             `json:"name,omitempty"`              //Name is the components of the user's real name. Providers MAY return just the full name as a single string in the formatted sub-attribute, or they MAY return just the individual component attributes using the other sub-attributes, or they MAY return both. If both variants are returned, they SHOULD be describing the same name, with the formatted name indicating how the component attributes should be combined.
 	NickName          string            `json:"nickName,omitempty"`          //NickName is the casual way to address the user in real life, e.g.'Bob' or 'Bobby' instead of 'Robert'. This attribute SHOULD NOT be used to represent a User's username (e.g. bjensen or mpepperidge)
 	Password          string            `json:"password,omitempty"`          //Password is the User's clear text password.  This attribute is intended to be used as a means to specify an initial password when creating a new User or to reset an existing User's password. -TODO - (This is a placeholder in case I implement the server in golang)
 	PhoneNumbers      []PhoneNumber     `json:"phoneNumbers,omitempty"`      //PhoneNumberrs are the phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g. 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile, fax, pager and other.")
@@ -107,10 +111,37 @@ func (u User) ResourceType() ResourceType {
 	return UserResourceType
 }
 
-func (u *User) MarshalJSON() ([]byte, error) {
-	return jap.Marshal(u)
+//
+// JSON marshaling and unmarshaling
+//
+
+func (u User) MarshalJSON() ([]byte, error) {
+	log.Info("Got to User's MarshalJSON()")
+	type Alias User
+	// alias := struct {
+	// 	*Alias
+	// }{
+	// 	Alias: (*Alias)(u),
+	// }
+
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	ap.RegisterAdditionalPropertiesExtension(json)
+	return json.Marshal((Alias)(u))
 }
 
-func (u *User) UnmarshalJSON(json []byte) error {
-	return Unmarshal(json, u)
+func (u *User) UnmarshalJSON(data []byte) error {
+	type Alias User
+	// var a Alias
+	// log.Info("Alias type: ", reflect.TypeOf(a).Name(), ", kind: ", reflect.TypeOf(a).Kind())
+	// type Container struct {
+	// 	Alias
+	// }
+	// alias := Container{
+	// 	Alias: (Alias)(*u),
+	// }
+	// log.Info("alias type: ", reflect.TypeOf(alias).Name(), ", kind: ", reflect.TypeOf(alias).Kind())
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	ap.RegisterAdditionalPropertiesExtension(json)
+	//return json.Unmarshal(data, &alias)
+	return json.Unmarshal(data, (*Alias)(u))
 }

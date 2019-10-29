@@ -20,9 +20,10 @@ import (
 
 const envPrefix = "scim"
 
-//ClientConfig ..
+// clientConfig ..
+// ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
 type clientCfg struct {
-	ServiceURL       string `split_words:"true" required:"true"` //ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
+	ServiceURL       string `split_words:"true" required:"true"`
 	IgnoreRedirects  bool   `split_words:"true" default:"false"`
 	DisableDiscovery bool   `split_words:"true" default:"false"`
 	DisableEtag      bool   `split_words:"true" default:"false"`
@@ -33,12 +34,6 @@ type clientCfg struct {
 //
 
 type ClientOpt func(*clientCfg)
-
-// func ServiceUrl(serviceUrl string) ClientOpt {
-// 	return func(cfg *clientCfg) {
-// 		cfg.ServiceURL = serviceUrl
-// 	}
-// }
 
 func IgnoreRedirects(ignoreRedirects bool) ClientOpt {
 	return func(cfg *clientCfg) {

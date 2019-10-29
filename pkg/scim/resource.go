@@ -48,15 +48,15 @@ type CommonAttributes struct {
 	ExternalID           string                     `json:"externalId,omitempty"`
 	Meta                 Meta                       `json:"meta"`
 	Schemas              []string                   `json:"schemas"`
-	AdditionalProperties map[string]json.RawMessage `json:"*,omitempty"`
+	AdditionalProperties map[string]json.RawMessage `json:"*"`
 }
 
 //Meta is a complex attribute containing resource metadata.
 //https://tools.ietf.org/html/rfc7643#section-3.1
 type Meta struct {
 	ResourceType string    `json:"resourceType"`
-	Created      time.Time `json:"created,string"`
-	LastModified time.Time `json:"lastModified,string"`
+	Created      time.Time `json:"created"`
+	LastModified time.Time `json:"lastModified"`
 	Location     string    `json:"location"`
 	Version      string    `json:"version"`
 }

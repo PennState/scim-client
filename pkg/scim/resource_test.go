@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	jap "github.com/PennState/go-additional-properties/pkg/json"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -165,7 +164,7 @@ func TestResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 
 	ca := getResourceWithAdditionalProperties()
-	data, err := jap.Marshal(&ca)
+	data, err := json.Marshal(&ca)
 	if err != nil {
 		assert.Error(err)
 	}

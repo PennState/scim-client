@@ -1,8 +1,10 @@
 package examples
 
 import (
-	jap "github.com/PennState/go-additional-properties/pkg/json"
+	"github.com/PennState/additional-properties/pkg/ap"
 	"github.com/PennState/scim-client/pkg/scim"
+	jsoniter "github.com/json-iterator/go"
+	log "github.com/sirupsen/logrus"
 )
 
 //Organization represents some hierarchy of an arbitrary organization
@@ -52,10 +54,33 @@ func (o Organization) ResourceType() scim.ResourceType {
 	return OrganizationResourceType
 }
 
-func (o *Organization) MarshalJSON() ([]byte, error) {
-	return jap.Marshal(o)
+func (o Organization) MarshalJSON() ([]byte, error) {
+	log.Info("Got to Organization's MarshalJSON()")
+	type Alias Organization
+	// alias := struct {
+	// 	*Alias
+	// }{
+	// 	Alias: (*Alias)(u),
+	// }
+
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	ap.RegisterAdditionalPropertiesExtension(json)
+	return json.Marshal((Alias)(o))
 }
 
-func (o *Organization) UnmarshalJSON(json []byte) error {
-	return scim.Unmarshal(json, o)
+func (o *Organization) UnmarshalJSON(data []byte) error {
+	type Alias Organization
+	// var a Alias
+	// log.Info("Alias type: ", reflect.TypeOf(a).Name(), ", kind: ", reflect.TypeOf(a).Kind())
+	// type Container struct {
+	// 	Alias
+	// }
+	// alias := Container{
+	// 	Alias: (Alias)(*u),
+	// }
+	// log.Info("alias type: ", reflect.TypeOf(alias).Name(), ", kind: ", reflect.TypeOf(alias).Kind())
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	ap.RegisterAdditionalPropertiesExtension(json)
+	//return json.Unmarshal(data, &alias)
+	return json.Unmarshal(data, (*Alias)(o))
 }

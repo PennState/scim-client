@@ -1,7 +1,5 @@
 package scim
 
-import jap "github.com/PennState/go-additional-properties/pkg/json"
-
 //Group describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.2
 type Group struct {
@@ -45,12 +43,4 @@ func (g Group) URN() string {
 //implementing the Resource interface.
 func (g Group) ResourceType() ResourceType {
 	return GroupResourceType
-}
-
-func (g *Group) MarshalJSON() ([]byte, error) {
-	return jap.Marshal(g)
-}
-
-func (g *Group) UnmarshalJSON(json []byte) error {
-	return Unmarshal(json, g)
 }
