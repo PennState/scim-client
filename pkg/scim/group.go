@@ -1,5 +1,9 @@
 package scim
 
+import (
+	"github.com/PennState/additional-properties/pkg/ap"
+)
+
 //Group describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.2
 type Group struct {
@@ -43,4 +47,22 @@ func (g Group) URN() string {
 //implementing the Resource interface.
 func (g Group) ResourceType() ResourceType {
 	return GroupResourceType
+}
+
+//
+// JSON marshaling and unmarshaling
+//
+
+// MarshalJSON implements https://golang.org/pkg/encoding/json/#Marshaler
+func (g Group) MarshalJSON() ([]byte, error) {
+	type Alias Group
+	json := ap.ConfigCompatibleWithStandardLibrary
+	return json.Marshal((Alias)(g))
+}
+
+// UnmarshalJSON implements https://golang.org/pkg/encoding/json/#Unmarshaler
+func (g *Group) UnmarshalJSON(data []byte) error {
+	type Alias Group
+	json := ap.ConfigCompatibleWithStandardLibrary
+	return json.Unmarshal(data, (*Alias)(g))
 }

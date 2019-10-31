@@ -2,8 +2,6 @@ package scim
 
 import (
 	"github.com/PennState/additional-properties/pkg/ap"
-	jsoniter "github.com/json-iterator/go"
-	log "github.com/sirupsen/logrus"
 )
 
 //UserURN is the IANA registered SCIM name for the standardized SCIM
@@ -115,33 +113,16 @@ func (u User) ResourceType() ResourceType {
 // JSON marshaling and unmarshaling
 //
 
+// MarshalJSON implements https://golang.org/pkg/encoding/json/#Marshaler
 func (u User) MarshalJSON() ([]byte, error) {
-	log.Info("Got to User's MarshalJSON()")
 	type Alias User
-	// alias := struct {
-	// 	*Alias
-	// }{
-	// 	Alias: (*Alias)(u),
-	// }
-
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
-	ap.RegisterAdditionalPropertiesExtension(json)
+	json := ap.ConfigCompatibleWithStandardLibrary
 	return json.Marshal((Alias)(u))
 }
 
+// UnmarshalJSON implements https://golang.org/pkg/encoding/json/#Unmarshaler
 func (u *User) UnmarshalJSON(data []byte) error {
 	type Alias User
-	// var a Alias
-	// log.Info("Alias type: ", reflect.TypeOf(a).Name(), ", kind: ", reflect.TypeOf(a).Kind())
-	// type Container struct {
-	// 	Alias
-	// }
-	// alias := Container{
-	// 	Alias: (Alias)(*u),
-	// }
-	// log.Info("alias type: ", reflect.TypeOf(alias).Name(), ", kind: ", reflect.TypeOf(alias).Kind())
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
-	ap.RegisterAdditionalPropertiesExtension(json)
-	//return json.Unmarshal(data, &alias)
+	json := ap.ConfigCompatibleWithStandardLibrary
 	return json.Unmarshal(data, (*Alias)(u))
 }
