@@ -95,7 +95,7 @@ func (lro *ListResponse) UnmarshalJSON(data []byte) error {
 
 		// TODO: Replace this block with code to unmarshall by resource type.
 		var user User
-		err = Unmarshal(rm, &user)
+		err = json.Unmarshal(rm, &user)
 		if err != nil {
 			return err
 		}

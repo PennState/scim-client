@@ -1,6 +1,8 @@
 package scim
 
-import jap "github.com/PennState/go-additional-properties/pkg/json"
+import (
+	"github.com/PennState/additional-properties/pkg/ap"
+)
 
 //Group describes a SCIM user based on the RFC7643 specification
 //https://tools.ietf.org/html/rfc7643#section-4.2
@@ -47,10 +49,20 @@ func (g Group) ResourceType() ResourceType {
 	return GroupResourceType
 }
 
-func (g *Group) MarshalJSON() ([]byte, error) {
-	return jap.Marshal(g)
+//
+// JSON marshaling and unmarshaling
+//
+
+// MarshalJSON implements https://golang.org/pkg/encoding/json/#Marshaler
+func (g Group) MarshalJSON() ([]byte, error) {
+	type Alias Group
+	json := ap.ConfigCompatibleWithStandardLibrary
+	return json.Marshal((Alias)(g))
 }
 
-func (g *Group) UnmarshalJSON(json []byte) error {
-	return Unmarshal(json, g)
+// UnmarshalJSON implements https://golang.org/pkg/encoding/json/#Unmarshaler
+func (g *Group) UnmarshalJSON(data []byte) error {
+	type Alias Group
+	json := ap.ConfigCompatibleWithStandardLibrary
+	return json.Unmarshal(data, (*Alias)(g))
 }

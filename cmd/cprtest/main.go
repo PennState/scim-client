@@ -20,8 +20,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 
-	"github.com/PennState/go-additional-properties/pkg/json"
 	"github.com/PennState/scim-client/pkg/scim"
 	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
