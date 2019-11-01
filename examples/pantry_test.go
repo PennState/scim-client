@@ -3,6 +3,7 @@ package examples
 import (
 	"testing"
 
+	"github.com/PennState/additional-properties/pkg/ap"
 	"github.com/PennState/scim-client/pkg/scim"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +37,8 @@ func TestPantryExtension(t *testing.T) {
 	require := require.New(t)
 
 	var user scim.User
-	err := scim.Unmarshal([]byte(pantryJSON), &user)
+	ap := ap.ConfigCompatibleWithStandardLibrary
+	err := ap.Unmarshal([]byte(pantryJSON), &user)
 	require.Nil(err)
 
 	var pantry Pantry

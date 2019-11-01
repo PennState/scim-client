@@ -2,12 +2,11 @@ package scim
 
 import (
 	"encoding/json"
-	"reflect"
 	"sort"
 	"testing"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/PennState/additional-properties/pkg/ap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -164,54 +163,56 @@ func TestResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 
 	ca := getResourceWithAdditionalProperties()
-	data, err := json.Marshal(&ca)
+	jap := ap.ConfigCompatibleWithStandardLibrary
+	data, err := jap.Marshal(&ca)
 	if err != nil {
 		assert.Error(err)
 	}
 
 	var obj map[string]json.RawMessage
-	err = json.Unmarshal(data, &obj)
+	err = jap.Unmarshal(data, &obj)
 	if err != nil {
 		assert.Error(err)
 	}
 	assert.Contains(obj, "id", "meta", "urn:fake.extension", "additionalPropertiesOne", "additionalPropertiesTwo")
-	assert.Equal("{\"name\":\"Fake Extension\"}", string(obj["urn:fake.extension"]))
-	assert.Equal("\"additionalPropertiesOne\"", string(obj["additionalPropertiesOne"]))
-	assert.Equal("\"additionalPropertiesTwo\"", string(obj["additionalPropertiesTwo"]))
+	assert.JSONEq("{\"name\":\"Fake Extension\"}", string(obj["urn:fake.extension"]))
+	assert.JSONEq("\"additionalPropertiesOne\"", string(obj["additionalPropertiesOne"]))
+	assert.JSONEq("\"additionalPropertiesTwo\"", string(obj["additionalPropertiesTwo"]))
 	meta := "{\"created\":\"0001-01-01T00:00:00Z\",\"lastModified\":\"0001-01-01T00:00:00Z\",\"location\":\"\",\"resourceType\":\"\",\"version\":\"\"}"
-	assert.Equal(meta, string(obj["meta"]))
+	//assert.Equal(meta, string(obj["meta"]))
+	assert.JSONEq(meta, string(obj["meta"]))
 }
 
-func DefaultJsonMarshalling(t *testing.T) {
-	var values = []interface{}{
-		"",
-		"this is a test",
-		nil,
-		123,
-		123.456,
-		true,
-		false,
-	}
-	for _, v := range values {
-		log.Info("Value: ", v)
-		m, err := json.Marshal(v)
-		if err != nil {
-			log.Error(err)
-			continue
-		}
-		log.Info("Marshaled: ", string(m))
-	}
+// func DefaultJsonMarshalling(t *testing.T) {
+// 	var values = []interface{}{
+// 		"",
+// 		"this is a test",
+// 		nil,
+// 		123,
+// 		123.456,
+// 		true,
+// 		false,
+// 	}
+// 	for _, v := range values {
+// 		log.Info("Value: ", v)
+// 		m, err := json.Marshal(v)
+// 		if err != nil {
+// 			log.Error(err)
+// 			continue
+// 		}
+// 		log.Info("Marshaled: ", string(m))
+// 	}
 
-	u := "2819c223-7f76-453a-919d-413861904646"
-	log.Info("UUID: ", u)
-	v := reflect.ValueOf(u)
-	log.Info("Value: ", v)
-	m, err := json.Marshal(v.Interface())
-	if err != nil {
-		log.Error(err)
-	}
-	log.Info("Marshaled: ", m)
-}
+// 	u := "2819c223-7f76-453a-919d-413861904646"
+// 	log.Info("UUID: ", u)
+// 	v := reflect.ValueOf(u)
+// 	log.Info("Value: ", v)
+// 	m, err := json.Marshal(v.Interface())
+// 	if err != nil {
+// 		log.Error(err)
+// 	}
+// 	log.Info("Marshaled: ", m)
+// }
 
 //
 //
@@ -240,7 +241,7 @@ func TestResourceUnmarshaling(t *testing.T) {
 	`
 
 	var ca CommonAttributes
-	error := Unmarshal([]byte(resourceJSON), &ca)
+	error := json.Unmarshal([]byte(resourceJSON), &ca)
 
 	assert.Nil(error, "Error unmarshaling the User object - %q", error)
 	assert.Equal(ca.ID, "2819c223-7f76-453a-919d-413861904646", "Missing or incorrect id attribute")
@@ -274,6 +275,6 @@ func TestBadResourceUnmarshaling(t *testing.T) {
 	}`
 
 	var ca CommonAttributes
-	err := Unmarshal([]byte(badResourceJSON), &ca)
+	err := json.Unmarshal([]byte(badResourceJSON), &ca)
 	assert.NotNil(err)
 }

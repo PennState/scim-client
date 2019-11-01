@@ -143,7 +143,7 @@ func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) e
 		return er
 	}
 
-	return Unmarshal(body, res)
+	return json.Unmarshal(body, res)
 }
 
 //SearchResource ..
@@ -275,7 +275,7 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 		return errors.New(resp.Status)
 	}
 
-	return Unmarshal(body, res)
+	return json.Unmarshal(body, res)
 }
 
 //func ModifyResource(res *Resource)
