@@ -3,6 +3,7 @@ package examples
 import (
 	"github.com/PennState/additional-properties/pkg/ap"
 	"github.com/PennState/scim-client/pkg/scim"
+	log "github.com/sirupsen/logrus"
 )
 
 // Organization represents some hierarchy of an arbitrary organization
@@ -11,10 +12,10 @@ import (
 // the Parent and Children references may be absolute or relative URIs.
 type Organization struct {
 	scim.CommonAttributes
-	Name     string                  `json:"name"`      //Name is the organization's name - e.g. "Tour Promotion"
-	Type     string                  `json:"type"`      //Type is the organization's type - e.g. "Department"
-	Parent   OrganizationReference   `json:"$parent"`   //Parent is a URI reference to a parent organization
-	Children []OrganizationReference `json:"$children"` //Children is a URI reference to zero or more child organizations
+	Name     string                  `json:"name,omitempty"`      //Name is the organization's name - e.g. "Tour Promotion"
+	Type     string                  `json:"type,omitempty"`      //Type is the organization's type - e.g. "Department"
+	Parent   OrganizationReference   `json:"$parent,omitempty"`   //Parent is a URI reference to a parent organization
+	Children []OrganizationReference `json:"$children,omitempty"` //Children is a URI reference to zero or more child organizations
 }
 
 // OrganizationReference is a string containing an absolute or relative
