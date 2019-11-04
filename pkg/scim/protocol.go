@@ -13,10 +13,10 @@ const ErrorResponseURN = "urn:ietf:params:scim:api:messages:2.0:Error"
 //server when an error must be returned to the client.
 //https://tools.ietf.org/html/rfc7644#section-3.12
 type ErrorResponse struct {
-	Schemas  []string `json:"schemas"`  //Schemas identifies the response as an ErrorResponse.
-	ScimType string   `json:"scimType"` //ScimType is a detail error keyword.  See Table 9.
-	Detail   string   `json:"detail"`   //Detail is a human-readable message.
-	Status   string   `json:"status"`   //Status is the HTTP status code expressed as a JSON string.
+	Schemas  []string `json:"schemas"`            //Schemas identifies the response as an ErrorResponse.
+	ScimType string   `json:"scimType,omitempty"` //ScimType is a detail error keyword.  See Table 9.
+	Detail   string   `json:"detail,omitempty"`   //Detail is a human-readable message.
+	Status   string   `json:"status"`             //Status is the HTTP status code expressed as a JSON string.
 }
 
 func (er ErrorResponse) Error() string {
