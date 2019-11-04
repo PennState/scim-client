@@ -5,8 +5,8 @@ const SchemaURN = "urn:ietf:params:scim:schemas:core:2.0:Schema"
 //https://tools.ietf.org/html/rfc7643#section-7
 type Schema struct {
 	CommonAttributes
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
+	Name        string      `json:"name,omitempty"`
+	Description string      `json:"description,omitempty"`
 	Attributes  []Attribute `json:"attributes"`
 }
 
@@ -17,7 +17,7 @@ type Attribute struct {
 	Multivalued     bool        `json:"multiValued"`
 	Description     string      `json:"description"`
 	Required        bool        `json:"required"`
-	CanonicalValues []string    `json:"canonicalValues"`
+	CanonicalValues []string    `json:"canonicalValues,omitempty"`
 	CaseExact       bool        `json:"caseExact"`
 	Mutability      Mutability  `json:"mutability"`
 	Returned        Returned    `json:"returned"`
