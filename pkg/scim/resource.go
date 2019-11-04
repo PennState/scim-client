@@ -211,7 +211,6 @@ func (m *Meta) UnmarshalJSON(j []byte) error {
 			t, err := time.Parse(time.RFC3339, value)
 
 			if err != nil {
-				log.Warnf("Unable to parse \"created\" %s", v)
 				return err
 			}
 			m.Created = t
@@ -220,7 +219,6 @@ func (m *Meta) UnmarshalJSON(j []byte) error {
 			t, err := time.Parse(time.RFC3339, value)
 
 			if err != nil {
-				log.Warnf("Unable to parse \"lastModified\" %s", v)
 				return err
 			}
 			m.LastModified = t

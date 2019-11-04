@@ -179,40 +179,8 @@ func TestResourceMarshaling(t *testing.T) {
 	assert.JSONEq("\"additionalPropertiesOne\"", string(obj["additionalPropertiesOne"]))
 	assert.JSONEq("\"additionalPropertiesTwo\"", string(obj["additionalPropertiesTwo"]))
 	meta := "{\"created\":\"0001-01-01T00:00:00Z\",\"lastModified\":\"0001-01-01T00:00:00Z\",\"location\":\"\",\"resourceType\":\"\",\"version\":\"\"}"
-	//assert.Equal(meta, string(obj["meta"]))
 	assert.JSONEq(meta, string(obj["meta"]))
 }
-
-// func DefaultJsonMarshalling(t *testing.T) {
-// 	var values = []interface{}{
-// 		"",
-// 		"this is a test",
-// 		nil,
-// 		123,
-// 		123.456,
-// 		true,
-// 		false,
-// 	}
-// 	for _, v := range values {
-// 		log.Info("Value: ", v)
-// 		m, err := json.Marshal(v)
-// 		if err != nil {
-// 			log.Error(err)
-// 			continue
-// 		}
-// 		log.Info("Marshaled: ", string(m))
-// 	}
-
-// 	u := "2819c223-7f76-453a-919d-413861904646"
-// 	log.Info("UUID: ", u)
-// 	v := reflect.ValueOf(u)
-// 	log.Info("Value: ", v)
-// 	m, err := json.Marshal(v.Interface())
-// 	if err != nil {
-// 		log.Error(err)
-// 	}
-// 	log.Info("Marshaled: ", m)
-// }
 
 //
 //

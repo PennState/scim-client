@@ -137,7 +137,6 @@ func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) e
 		var er ErrorResponse
 		err = json.Unmarshal(body, &er)
 		if err != nil {
-			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
 			return err
 		}
 		return er
@@ -194,11 +193,9 @@ func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListR
 		var er ErrorResponse
 		err = json.Unmarshal(body, &er)
 		if err != nil {
-			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
 			return lr, err
 		}
-		log.Error("ErrorResponse: ", er)
-		return lr, errors.New(resp.Status)
+		return lr, er
 	}
 
 	log.Debug("Body: ", string(body))
@@ -211,12 +208,12 @@ func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListR
 
 //CreateResource ..
 func (c Client) CreateResource(ctx context.Context, res Resource) error {
-	log.Info("(c Client) ReplaceResource(res)")
+	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
 	if err != nil {
 		return err
 	}
-	log.Info("Marshaled resource: ", string(rj))
+	log.Debug("Marshaled resource: ", string(rj))
 
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint
 	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(rj))
@@ -228,18 +225,18 @@ func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	if err != nil {
 		return err
 	}
-	log.Info(resp)
+	log.Debug(resp)
 	return nil
 }
 
 //ReplaceResource ..
 func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
-	log.Info("(c Client) ReplaceResource(res)")
+	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
 	if err != nil {
 		return err
 	}
-	log.Info("Marshaled resource: ", string(rj))
+	log.Debug("Marshaled resource: ", string(rj))
 
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + res.getID()
 	req, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(rj))
@@ -255,23 +252,21 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	if err != nil {
 		return err
 	}
-	log.Info("Replace HTTP status code: ", resp.StatusCode)
+	log.Debug("Replace HTTP status code: ", resp.StatusCode)
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-	log.Infof("Body: %s", body)
+	log.Debugf("Body: %s", body)
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		var er ErrorResponse
 		err = json.Unmarshal(body, &er)
 		if err != nil {
-			log.Error("Couldn't unmarshal ErrorResponse") // TODO: Fix SCIMple to return the correct format
 			return err
 		}
-		log.Error("ErrorResponse: ", er)
 		return errors.New(resp.Status)
 	}
 
