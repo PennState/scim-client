@@ -277,9 +277,9 @@ func TestResourceMarshaling(t *testing.T) {
 	for idx := range cases {
 		c := cases[idx]
 		t.Run(c.Name, func(t *testing.T) {
-			fp := goldenfile.GetDefaultFilePath(c.GoldenFile)
 			data, err := json.Marshal(c.TestResource)
 			require.NoError(t, err)
+			fp := goldenfile.GetDefaultFilePath(c.GoldenFile)
 			goldenfile.AssertJSONEq(t, fp, string(data))
 		})
 	}
