@@ -9,7 +9,7 @@ package main
 //
 //Or simply run it in a single step if you don't need an executable
 //
-//	go run main.go
+//	go run ./cmd/cprtest
 //
 //Required env variables are:
 //
@@ -29,6 +29,7 @@ import (
 
 func main() {
 	log.AddHook(filename.NewHook())
+
 	sClient, err := NewOAuthClientFromEnv()
 	if err != nil {
 		log.Error(err)
