@@ -5,7 +5,7 @@ const ServiceProviderConfigURN = "urn:ietf:params:scim:schemas:core:2.0:ServiceP
 //https://tools.ietf.org/html/rfc7643#section-7
 type ServiceProviderConfig struct {
 	CommonAttributes
-	DocumentationURI      string                       `json:"documentationUri"`
+	DocumentationURI      string                       `json:"documentationUri,omitempty"`
 	PatchConfig           PatchConfig                  `json:"patch" validation:"required"`
 	BulkConfig            BulkConfig                   `json:"bulk" validation:"required"`
 	FilterConfig          FilterConfig                 `json:"filter" validation:"required"`
@@ -42,8 +42,8 @@ type AuthenticationSchemeConfig struct {
 	Type             AuthenticationSchemeType `json:"type" validation:"required"`
 	Name             string                   `json:"name" validation:"required"`
 	Description      string                   `json:"description" validation:"required"`
-	SpecURI          string                   `json:"specUri"`
-	DocumentationURI string                   `json:"documentationUri"`
+	SpecURI          string                   `json:"specUri,omitempty"`
+	DocumentationURI string                   `json:"documentationUri,omitempty"`
 }
 
 type AuthenticationSchemeType string
