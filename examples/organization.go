@@ -3,7 +3,6 @@ package examples
 import (
 	"github.com/PennState/additional-properties/pkg/ap"
 	"github.com/PennState/scim-client/pkg/scim"
-	log "github.com/sirupsen/logrus"
 )
 
 // Organization represents some hierarchy of an arbitrary organization
