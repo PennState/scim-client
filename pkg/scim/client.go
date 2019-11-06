@@ -97,7 +97,7 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 	}
 	_, err := url.Parse(cfg.ServiceURL)
 	if err != nil {
-		return nil, errors.New("Provided service URL is not valid")
+		return nil, errors.New("provided service URL is not valid")
 	}
 
 	return &Client{
