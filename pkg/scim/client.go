@@ -112,7 +112,8 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 //Resource accessor/mutator methods
 //
 
-//RetrieveResource ..
+// RetrieveResource populates the provided (and presumably empty) resourcs
+// with data associated with the provided id from the SCIM servers storage.
 func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) error {
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 
@@ -206,7 +207,9 @@ func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListR
 	return lr, nil
 }
 
-//CreateResource ..
+// CreateResource adds the provided resource to those stored by the SCIM
+// server, returning an updated version that includes the generated id
+// value as well as Meta data.
 func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
@@ -225,7 +228,8 @@ func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	return c.resourceOrError(res, req)
 }
 
-//ReplaceResource ..
+// ReplaceResource updates the data on the SCIM server that's associated
+// with the provided id.
 func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
@@ -269,7 +273,11 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	return json.Unmarshal(body, res)
 }
 
-//func ModifyResource(res *Resource)
+//
+// Not-yet-implemented
+//
+
+//func ModifyResource(res *Resource) - PATCH is not available via SCIMple
 //func DeleteResource(res *Resource) error
 //func Bulk
 
