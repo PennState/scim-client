@@ -97,7 +97,7 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 	}
 	_, err := url.Parse(cfg.ServiceURL)
 	if err != nil {
-		return nil, errors.New("Provided service URL is not valid")
+		return nil, errors.New("provided service URL is not valid")
 	}
 
 	return &Client{
@@ -112,7 +112,8 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 //Resource accessor/mutator methods
 //
 
-//RetrieveResource ..
+// RetrieveResource populates the provided (and presumably empty) resourcs
+// with data associated with the provided id from the SCIM servers storage.
 func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) error {
 	path := c.cfg.ServiceURL + res.ResourceType().Endpoint + "/" + id
 
@@ -206,7 +207,9 @@ func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListR
 	return lr, nil
 }
 
-//CreateResource ..
+// CreateResource adds the provided resource to those stored by the SCIM
+// server, returning an updated version that includes the generated id
+// value as well as Meta data.
 func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
@@ -221,15 +224,12 @@ func (c Client) CreateResource(ctx context.Context, res Resource) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/scim+json")
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	log.Debug(resp)
-	return nil
+
+	return c.resourceOrError(res, req)
 }
 
-//ReplaceResource ..
+// ReplaceResource updates the data on the SCIM server that's associated
+// with the provided id.
 func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	log.Trace("(c Client) ReplaceResource(res)")
 	rj, err := json.Marshal(res)
@@ -273,7 +273,11 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	return json.Unmarshal(body, res)
 }
 
-//func ModifyResource(res *Resource)
+//
+// Not-yet-implemented
+//
+
+//func ModifyResource(res *Resource) - PATCH is not available via SCIMple
 //func DeleteResource(res *Resource) error
 //func Bulk
 
@@ -316,7 +320,7 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 		return err
 	}
 
-	body, err := getStringEntityBody(resp)
+	body, err := c.body(resp)
 	if err != nil {
 		return err
 	}
@@ -328,9 +332,54 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 //General HTTP client code
 //
 
-func getStringEntityBody(resp *http.Response) ([]byte, error) {
+func (c Client) body(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	log.Debugf("Body: %s", body)
 	return body, err
+}
+
+func (c Client) error(resp *http.Response) error {
+	body, err := c.body(resp)
+	if err != nil {
+		return err
+	}
+
+	var er ErrorResponse
+	err = json.Unmarshal(body, &er)
+	if err != nil {
+		return err
+	}
+	return er
+}
+
+func (c Client) etag(res Resource, req *http.Request) {
+	if !c.cfg.DisableEtag {
+		req.Header.Set("If-Match", res.getMeta().Version)
+	}
+}
+
+func (c Client) mime(req *http.Request) {
+	req.Header.Set("Accept", "application/scim+json")
+	req.Header.Set("Content-Type", "application/scim+json")
+}
+
+func (c Client) resourceOrError(res Resource, req *http.Request) error {
+	c.mime(req)
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return c.error(resp)
+	}
+	return c.resource(resp, res)
+}
+
+func (c Client) resource(resp *http.Response, res Resource) error {
+	body, err := c.body(resp)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, res)
 }
