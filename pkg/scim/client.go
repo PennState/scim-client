@@ -221,12 +221,8 @@ func (c Client) CreateResource(ctx context.Context, res Resource) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/scim+json")
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	log.Debug(resp)
-	return nil
+
+	return c.resourceOrError(res, req)
 }
 
 //ReplaceResource ..
@@ -316,7 +312,7 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 		return err
 	}
 
-	body, err := getStringEntityBody(resp)
+	body, err := c.body(resp)
 	if err != nil {
 		return err
 	}
@@ -328,9 +324,54 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 //General HTTP client code
 //
 
-func getStringEntityBody(resp *http.Response) ([]byte, error) {
+func (c Client) body(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	log.Debugf("Body: %s", body)
 	return body, err
+}
+
+func (c Client) error(resp *http.Response) error {
+	body, err := c.body(resp)
+	if err != nil {
+		return err
+	}
+
+	var er ErrorResponse
+	err = json.Unmarshal(body, &er)
+	if err != nil {
+		return err
+	}
+	return er
+}
+
+func (c Client) etag(res Resource, req *http.Request) {
+	if !c.cfg.DisableEtag {
+		req.Header.Set("If-Match", res.getMeta().Version)
+	}
+}
+
+func (c Client) mime(req *http.Request) {
+	req.Header.Set("Accept", "application/scim+json")
+	req.Header.Set("Content-Type", "application/scim+json")
+}
+
+func (c Client) resourceOrError(res Resource, req *http.Request) error {
+	c.mime(req)
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return c.error(resp)
+	}
+	return c.resource(resp, res)
+}
+
+func (c Client) resource(resp *http.Response, res Resource) error {
+	body, err := c.body(resp)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, res)
 }
