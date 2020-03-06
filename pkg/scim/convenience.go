@@ -5,20 +5,23 @@ import (
 )
 
 const (
-	resourcesByExternalId = "externalId EQ \"%s\""
+	resourcesByExternalID = "externalId EQ \"%s\""
 	userByUserName        = "userName EQ \"%s\""
 )
 
 // QueryResourcesByExternalID is a helper method for retrieving resources
 // from a ResourceType by ExternalID
-func (c Client) QueryResourceTypeByExternalID(ctx context.Context, rt ResourceType, externalID string) (ListResponse, error) {
-	return c.QueryResourceType(ctx, rt, NewSearchRequestFromFormat(resourcesByExternalId, externalID))
+func (c Client) QueryResourceTypeByExternalID(
+	ctx context.Context,
+	rt ResourceType,
+	externalID string) (ListResponse, error) {
+	return c.QueryResourceType(ctx, rt, NewSearchRequestFromFormat(resourcesByExternalID, externalID))
 }
 
 // QueryServerByExternalID is a helper method for retrieving any resources
 // from the server by ExternalID
 func (c Client) QueryServerByExternalID(ctx context.Context, externalID string) (ListResponse, error) {
-	return c.QueryServer(ctx, NewSearchRequestFromFormat(resourcesByExternalId, externalID))
+	return c.QueryServer(ctx, NewSearchRequestFromFormat(resourcesByExternalID, externalID))
 }
 
 // QueryUserResourcesByUserName is a helper method for retrieving User
