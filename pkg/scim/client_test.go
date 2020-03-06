@@ -3,6 +3,7 @@ package scim
 import (
 	"fmt"
 	"math"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,6 +32,20 @@ func TestClientOptsParsing(t *testing.T) {
 			assert.Equal(t, ir, c.cfg.IgnoreRedirects)
 		})
 	}
+}
+
+func TestNewClientFromEnv(t *testing.T) {
+	url := "https://example.com/scim"
+	os.Setenv("SCIM_SERVICE_URL", url)
+	os.Setenv("SCIM_IGNORE_REDIRECTS", "true")
+	os.Setenv("SCIM_DISABLE_DISCOVERY", "true")
+	os.Setenv("SCIM_DISABLE_ETAG", "true")
+	c, err := NewClientFromEnv(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, c.cfg.ServiceURL, url)
+	assert.True(t, c.cfg.IgnoreRedirects)
+	assert.True(t, c.cfg.DisableDiscovery)
+	assert.True(t, c.cfg.DisableEtag)
 }
 
 func TestServiceURLParsing(t *testing.T) {
