@@ -20,6 +20,15 @@ import (
 
 const envPrefix = "scim"
 
+//
+// Error messages
+//
+
+const (
+	noServiceURLMessage      = "ServiceURL is a required configuration parameter"
+	invalidServiceURLMessage = "provided ServiceURL is not valid"
+)
+
 // clientConfig ..
 // ServiceURL is the base URI of the SCIM server's resources - see https://tools.ietf.org/html/rfc7644#section-1.3
 type clientCfg struct {
@@ -93,11 +102,17 @@ func newClient(http *http.Client, cfg *clientCfg) (*Client, error) {
 
 	//Validate that the URL exists and is formatted correctly
 	if cfg.ServiceURL == "" {
-		return nil, errors.New("ServiceURL is a required configuration parameter")
+		return nil, errors.New(noServiceURLMessage)
 	}
 	_, err := url.Parse(cfg.ServiceURL)
 	if err != nil {
-		return nil, errors.New("provided service URL is not valid")
+		return nil, errors.New(invalidServiceURLMessage)
+	}
+
+	// String trailing slash from SCIM server URL (all resource paths include a
+	// leading slash)
+	if cfg.ServiceURL[len(cfg.ServiceURL)-1:] == "/" {
+		cfg.ServiceURL = cfg.ServiceURL[:len(cfg.ServiceURL)-1]
 	}
 
 	return &Client{
