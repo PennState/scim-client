@@ -73,7 +73,8 @@ type Multivalued struct {
 //StringMultivalued provides a base structure for simple string multi-valued attributes.
 type StringMultivalued struct {
 	Multivalued
-	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	numbeca.
+	Key   string `json:"key,omitempty"` // hack to align with PSU/Apache SCIMple
+	Value string `json:"value"`         //The attribute's significant value, e.g., email address, phone	numbeca.
 }
 
 //
