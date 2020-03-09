@@ -64,6 +64,7 @@ type Meta struct {
 //Multivalued attributes contain a list of elements using the JSON array format defined in Section 5 of [RFC7159].
 //https://tools.ietf.org/html/rfc7643#section-2.4
 type Multivalued struct {
+	Key       string `json:"key,omitempty"`     // hack to align with PSU/Apache SCIMple
 	Type      string `json:"type,omitempty"`    //Type is a label indicating the attribute's function; e.g., 'work' or 'home'.
 	Display   string `json:"display,omitempty"` //Display is a  human readable name, primarily used for display purposes. READ-ONLY.
 	Primary   bool   `json:"primary,omitempty"` //Primary is a boolean value indicating the 'primary' or preferred attribute value for this attribute, e.g. the preferred mailing address or primary e-mail address. The primary attribute value 'true' MUST appear no more than once.
@@ -73,8 +74,7 @@ type Multivalued struct {
 //StringMultivalued provides a base structure for simple string multi-valued attributes.
 type StringMultivalued struct {
 	Multivalued
-	Key   string `json:"key,omitempty"` // hack to align with PSU/Apache SCIMple
-	Value string `json:"value"`         //The attribute's significant value, e.g., email address, phone	numbeca.
+	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	numbeca.
 }
 
 //
