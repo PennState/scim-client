@@ -1,6 +1,8 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/PennState/additional-properties v0.10.0 h1:ExnExuD6arP+M6j9Flm7S8saKDZ7Bwk76jqfbO5Wqlk=
 github.com/PennState/additional-properties v0.10.0/go.mod h1:ZN46kLCTpZ0T9pGPnuyUc7Y69M9QClVPLpcMFsg+yqc=
+github.com/PennState/httputil v0.0.0-20200324153315-999ee0c6002c h1:iywhAlr0/IbF9tIgAzAAE5TKHIntxanR618oVUyNMI8=
+github.com/PennState/httputil v0.0.0-20200324153315-999ee0c6002c/go.mod h1:LyYIsa3nP2wz2eQoSgYIaMKuMX1YDJchcnuLcRFugVg=
 github.com/PennState/proctor v0.3.0 h1:Yw/k1w+D5lFNxHeMbekgNA+BM8aCkrd9mFRR3l2gqK0=
 github.com/PennState/proctor v0.3.0/go.mod h1:DppQkiiianJWxD+rVXnC5vM2hmx/w3KU2grxwqGTKh8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -37,6 +39,8 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
+github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20180724234803-3673e40ba225/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
