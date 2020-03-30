@@ -1,6 +1,7 @@
 package scim
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -93,10 +94,57 @@ func TestResourceOrError(t *testing.T) {
 		}
 	}
 	`
+
+	type etyp int
+
+	const (
+		none etyp = iota
+		perr
+		herr
+		serr
+	)
+
 	tests := []struct {
 		name string
 		mock httptest.MockTransport
+		etyp etyp
 	}{
+		{
+			name: "Protocol error",
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Err: errors.New("Protocol Error"),
+			},
+			etyp: perr,
+		},
+		{
+			name: "HTTP error - no body", // TODO: Empty body?
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Resp: &http.Response{
+					StatusCode: 400,
+					Body:       ioutil.NopCloser(strings.NewReader("")),
+				},
+			},
+			etyp: perr,
+		},
+		{
+			name: "HTTP error - with body",
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Resp: &http.Response{
+					StatusCode: 400,
+					Body:       ioutil.NopCloser(strings.NewReader("400 Bad Request")),
+				},
+			},
+			etyp: perr,
+		},
 		{
 			name: "Correct",
 			mock: httptest.MockTransport{
@@ -108,6 +156,7 @@ func TestResourceOrError(t *testing.T) {
 					Body:       ioutil.NopCloser(strings.NewReader(minuser)),
 				},
 			},
+			etyp: none,
 		},
 	}
 
@@ -130,6 +179,10 @@ func TestResourceOrError(t *testing.T) {
 
 			assert.Contains(t, test.mock.Req.Header, "Accept")
 			assert.Contains(t, test.mock.Req.Header, "Content-Type")
+
+			if test.etyp != none {
+				return
+			}
 
 			assert.NoError(t, err)
 		})
