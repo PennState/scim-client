@@ -2,10 +2,15 @@ package scim
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/PennState/httputil/pkg/httptest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,6 +74,64 @@ func TestServiceURLParsing(t *testing.T) {
 				return
 			}
 			assert.Equal(t, test.ExpectedURL, c.cfg.ServiceURL)
+		})
+	}
+}
+
+func TestResourceOrError(t *testing.T) {
+	const minuser = `
+	{
+		"schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+		"id": "2819c223-7f76-453a-919d-413861904646",
+		"userName": "bjensen@example.com",
+		"meta": {
+			"resourceType": "User",
+			"created": "2010-01-23T04:56:22Z",
+			"lastModified": "2011-05-13T04:42:34Z",
+			"version": "W\/\"3694e05e9dff590\"",
+			"location": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646"
+		}
+	}
+	`
+	tests := []struct {
+		name string
+		mock httptest.MockTransport
+	}{
+		{
+			name: "Correct",
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Resp: &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(strings.NewReader(minuser)),
+				},
+			},
+		},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		t.Run(test.name, func(t *testing.T) {
+			test.mock.Req = &http.Request{
+				URL:    &url.URL{},
+				Header: map[string][]string{},
+			}
+			cl := Client{
+				client: &client{
+					http: &http.Client{
+						Transport: test.mock,
+					},
+				},
+			}
+			user := User{}
+			err := cl.resourceOrError(&user, test.mock.Req)
+
+			assert.Contains(t, test.mock.Req.Header, "Accept")
+			assert.Contains(t, test.mock.Req.Header, "Content-Type")
+
+			assert.NoError(t, err)
 		})
 	}
 }
