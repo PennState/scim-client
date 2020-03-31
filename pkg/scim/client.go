@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"reflect"
 
+	"github.com/PennState/httputil/pkg/httperror"
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
 )
@@ -348,22 +349,28 @@ func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscover
 //
 
 func (c Client) body(resp *http.Response) ([]byte, error) {
+	if resp.Body == nil {
+		return nil, errors.New("<No body>")
+	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	log.Debugf("Body: %s", body)
-	return body, err
+	return ioutil.ReadAll(resp.Body)
 }
 
 func (c Client) error(resp *http.Response) error {
+	he := httperror.HTTPError{
+		Code:        resp.StatusCode,
+		Description: resp.Status,
+	}
 	body, err := c.body(resp)
 	if err != nil {
-		return err
+		return he
 	}
+	he.Body = string(body)
 
-	var er ErrorResponse
+	er := ErrorResponse{}
 	err = json.Unmarshal(body, &er)
 	if err != nil {
-		return err
+		return he
 	}
 	return er
 }

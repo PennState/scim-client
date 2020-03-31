@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/PennState/httputil/pkg/httperror"
 	"github.com/PennState/httputil/pkg/httptest"
 	"github.com/stretchr/testify/assert"
 )
@@ -79,6 +80,84 @@ func TestServiceURLParsing(t *testing.T) {
 	}
 }
 
+func TestError(t *testing.T) {
+	const er = `{
+		"schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+		"scimType":"mutability",
+		"detail":"Attribute 'id' is readOnly",
+		"status": "400"
+	}`
+
+	tests := []struct {
+		name string
+		resp *http.Response
+		exp  error
+	}{
+		{
+			name: "HTTP error - no body",
+			resp: &http.Response{
+				StatusCode: 400,
+				Status:     "Bad request",
+			},
+			exp: httperror.HTTPError{
+				Code:        400,
+				Description: "Bad request",
+			},
+		},
+		{
+			name: "HTTP error - with empty body",
+			resp: &http.Response{
+				StatusCode: 400,
+				Status:     "Bad request",
+				Body:       ioutil.NopCloser(strings.NewReader("")),
+			},
+			exp: httperror.HTTPError{
+				Code:        400,
+				Description: "Bad request",
+				Body:        "",
+			},
+		},
+		{
+			name: "HTTP error - with body",
+			resp: &http.Response{
+				StatusCode: 400,
+				Status:     "Bad request",
+				Body:       ioutil.NopCloser(strings.NewReader("Response body")),
+			},
+			exp: httperror.HTTPError{
+				Code:        400,
+				Description: "Bad request",
+				Body:        "Response body",
+			},
+		},
+		{
+			name: "SCIM ErrorResponse",
+			resp: &http.Response{
+				StatusCode: 400,
+				Status:     "Bad request",
+				Body:       ioutil.NopCloser(strings.NewReader(er)),
+			},
+			exp: ErrorResponse{
+				Schemas:  []string{"urn:ietf:params:scim:api:messages:2.0:Error"},
+				ScimType: "mutability",
+				Detail:   "Attribute 'id' is readOnly",
+				Status:   "400",
+			},
+		},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		t.Run(test.name, func(t *testing.T) {
+			c := Client{
+				client: &client{},
+			}
+			act := c.error(test.resp)
+			assert.Equal(t, test.exp, act)
+		})
+	}
+}
+
 func TestResourceOrError(t *testing.T) {
 	const minuser = `
 	{
@@ -95,19 +174,10 @@ func TestResourceOrError(t *testing.T) {
 	}
 	`
 
-	type etyp int
-
-	const (
-		none etyp = iota
-		perr
-		herr
-		serr
-	)
-
 	tests := []struct {
 		name string
 		mock httptest.MockTransport
-		etyp etyp
+		exp  error
 	}{
 		{
 			name: "Protocol error",
@@ -117,33 +187,27 @@ func TestResourceOrError(t *testing.T) {
 				},
 				Err: errors.New("Protocol Error"),
 			},
-			etyp: perr,
+			exp: &url.Error{
+				Op:  "Get",
+				URL: "",
+				Err: errors.New("Protocol Error"),
+			},
 		},
 		{
-			name: "HTTP error - no body", // TODO: Empty body?
+			name: "HTTP error",
 			mock: httptest.MockTransport{
 				Req: &http.Request{
 					Header: map[string][]string{},
 				},
 				Resp: &http.Response{
 					StatusCode: 400,
-					Body:       ioutil.NopCloser(strings.NewReader("")),
+					Status:     "Bad request",
 				},
 			},
-			etyp: perr,
-		},
-		{
-			name: "HTTP error - with body",
-			mock: httptest.MockTransport{
-				Req: &http.Request{
-					Header: map[string][]string{},
-				},
-				Resp: &http.Response{
-					StatusCode: 400,
-					Body:       ioutil.NopCloser(strings.NewReader("400 Bad Request")),
-				},
+			exp: httperror.HTTPError{
+				Code:        400,
+				Description: "Bad request",
 			},
-			etyp: perr,
 		},
 		{
 			name: "Correct",
@@ -156,7 +220,6 @@ func TestResourceOrError(t *testing.T) {
 					Body:       ioutil.NopCloser(strings.NewReader(minuser)),
 				},
 			},
-			etyp: none,
 		},
 	}
 
@@ -175,16 +238,18 @@ func TestResourceOrError(t *testing.T) {
 				},
 			}
 			user := User{}
-			err := cl.resourceOrError(&user, test.mock.Req)
+			act := cl.resourceOrError(&user, test.mock.Req)
 
 			assert.Contains(t, test.mock.Req.Header, "Accept")
 			assert.Contains(t, test.mock.Req.Header, "Content-Type")
 
-			if test.etyp != none {
+			if test.name != "Correct" {
+				assert.Error(t, act)
+				assert.Equal(t, test.exp, act)
 				return
 			}
 
-			assert.NoError(t, err)
+			assert.NoError(t, act)
 		})
 	}
 }
