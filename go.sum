@@ -3,6 +3,8 @@ github.com/PennState/additional-properties v0.10.0 h1:ExnExuD6arP+M6j9Flm7S8saKD
 github.com/PennState/additional-properties v0.10.0/go.mod h1:ZN46kLCTpZ0T9pGPnuyUc7Y69M9QClVPLpcMFsg+yqc=
 github.com/PennState/httputil v0.0.0-20200324153315-999ee0c6002c h1:iywhAlr0/IbF9tIgAzAAE5TKHIntxanR618oVUyNMI8=
 github.com/PennState/httputil v0.0.0-20200324153315-999ee0c6002c/go.mod h1:LyYIsa3nP2wz2eQoSgYIaMKuMX1YDJchcnuLcRFugVg=
+github.com/PennState/httputil v0.0.0-20200331141511-b6cd879122fd h1:RrnmXFpx6R2TVGJMDVXU+3x/CIEQJEl0Zr8kxTm+CKo=
+github.com/PennState/httputil v0.0.0-20200331141511-b6cd879122fd/go.mod h1:LyYIsa3nP2wz2eQoSgYIaMKuMX1YDJchcnuLcRFugVg=
 github.com/PennState/proctor v0.3.0 h1:Yw/k1w+D5lFNxHeMbekgNA+BM8aCkrd9mFRR3l2gqK0=
 github.com/PennState/proctor v0.3.0/go.mod h1:DppQkiiianJWxD+rVXnC5vM2hmx/w3KU2grxwqGTKh8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
