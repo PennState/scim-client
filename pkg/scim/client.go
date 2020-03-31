@@ -259,34 +259,9 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/scim+json")
-	if !c.cfg.DisableEtag {
-		req.Header.Set("If-Match", res.getMeta().Version)
-	}
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	log.Debug("Replace HTTP status code: ", resp.StatusCode)
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	log.Debugf("Body: %s", body)
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var er ErrorResponse
-		err = json.Unmarshal(body, &er)
-		if err != nil {
-			return err
-		}
-		return errors.New(resp.Status)
-	}
-
-	return json.Unmarshal(body, res)
+	c.etag(res, req)
+	// TODO: Is there an issue with reusing res (instead of a new/empty one)
+	return c.resourceOrError(res, req)
 }
 
 //
