@@ -377,5 +377,15 @@ func (c Client) resource(resp *http.Response, res Resource) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(body, res)
+
+	err = json.Unmarshal(body, res)
+	if err != nil {
+		return CodecError{
+			Err:  err.Error(),
+			Op:   Unmarshal,
+			Body: body,
+		}
+	}
+
+	return nil
 }

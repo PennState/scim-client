@@ -258,6 +258,36 @@ func TestResourceOrError(t *testing.T) {
 			},
 		},
 		{
+			name: "No body",
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Resp: &http.Response{
+					StatusCode: 200,
+					Body:       nil,
+				},
+			},
+			exp: errors.New("<No body>"),
+		},
+		{
+			name: "Bad JSON",
+			mock: httptest.MockTransport{
+				Req: &http.Request{
+					Header: map[string][]string{},
+				},
+				Resp: &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(strings.NewReader("}")),
+				},
+			},
+			exp: CodecError{
+				Err:  "invalid character '}' looking for beginning of value",
+				Op:   Unmarshal,
+				Body: []byte("}"),
+			},
+		},
+		{
 			name: "Correct",
 			mock: httptest.MockTransport{
 				Req: &http.Request{
