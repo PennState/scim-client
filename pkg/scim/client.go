@@ -239,7 +239,6 @@ func (c Client) CreateResource(ctx context.Context, res Resource) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/scim+json")
 
 	return c.resourceOrError(res, req)
 }
