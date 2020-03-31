@@ -158,6 +158,54 @@ func TestError(t *testing.T) {
 	}
 }
 
+func TestETag(t *testing.T) {
+	vers := "W\\/\"3694e05e9dff590\""
+	res := User{
+		CommonAttributes: CommonAttributes{
+			Meta: Meta{
+				Version: vers,
+			},
+		},
+	}
+
+	tests := []struct {
+		name     string
+		disabled bool
+	}{
+		{"ETags disabled", true},
+		{"ETags enabled", false},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		t.Run(test.name, func(t *testing.T) {
+			c := Client{
+				client: &client{
+					cfg: &clientCfg{
+						DisableEtag: test.disabled,
+					},
+				},
+			}
+
+			req := http.Request{
+				Header: map[string][]string{},
+			}
+
+			c.etag(&res, &req)
+
+			if test.disabled {
+				assert.NotContains(t, req.Header, "If-Match")
+				return
+			}
+
+			assert.Contains(t, req.Header, "If-Match")
+			exp := []string{}
+			exp = append(exp, vers)
+			assert.Equal(t, exp, req.Header["If-Match"])
+		})
+	}
+}
+
 func TestResourceOrError(t *testing.T) {
 	const minuser = `
 	{
