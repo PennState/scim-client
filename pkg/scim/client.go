@@ -138,28 +138,8 @@ func (c Client) RetrieveResource(ctx context.Context, res Resource, id string) e
 	if err != nil {
 		return err
 	}
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	log.Debugf("Body: %s", body)
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var er ErrorResponse
-		err = json.Unmarshal(body, &er)
-		if err != nil {
-			return err
-		}
-		return er
-	}
-
-	return json.Unmarshal(body, res)
+	return c.resourceOrError(res, req)
 }
 
 //SearchResource ..
