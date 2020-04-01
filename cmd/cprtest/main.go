@@ -131,7 +131,7 @@ func main() {
 	// List the server's service provider config
 
 	var cfg scim.ServiceProviderConfig
-	cfg, err = sClient.GetServerProviderConfig(context.TODO())
+	cfg, err = sClient.GetServiceProviderConfig(context.TODO())
 	if err != nil {
 		log.Error(err)
 	}

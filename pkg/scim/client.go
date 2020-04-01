@@ -287,7 +287,7 @@ func (c Client) GetSchemas(ctx context.Context) ([]Schema, error) {
 	return schemas, err
 }
 
-func (c Client) GetServerProviderConfig(ctx context.Context) (ServiceProviderConfig, error) {
+func (c Client) GetServiceProviderConfig(ctx context.Context) (ServiceProviderConfig, error) {
 	var cfg ServiceProviderConfig
 	err := c.getServerDiscoveryResource(ctx, &cfg)
 	return cfg, err
