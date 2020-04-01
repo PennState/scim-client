@@ -173,34 +173,9 @@ func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListR
 	if err != nil {
 		return lr, err
 	}
-	req.Header.Set("Content-Type", "application/scim+json")
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return lr, err
-	}
-	log.Debug("Search HTTP status code: ", resp.StatusCode)
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return lr, err
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var er ErrorResponse
-		err = json.Unmarshal(body, &er)
-		if err != nil {
-			return lr, err
-		}
-		return lr, er
-	}
-
-	log.Debug("Body: ", string(body))
-	err = json.Unmarshal(body, &lr)
-	if err != nil {
-		return lr, err
-	}
-	return lr, nil
+	err = c.resourceOrError(&lr, req)
+	return lr, err
 }
 
 // CreateResource adds the provided resource to those stored by the SCIM
@@ -330,7 +305,7 @@ func (c Client) mime(req *http.Request) {
 	req.Header.Set("Content-Type", "application/scim+json")
 }
 
-func (c Client) resourceOrError(res Resource, req *http.Request) error {
+func (c Client) resourceOrError(res interface{}, req *http.Request) error {
 	c.mime(req)
 	resp, err := c.http.Do(req)
 	if err != nil {
@@ -342,7 +317,7 @@ func (c Client) resourceOrError(res Resource, req *http.Request) error {
 	return c.resource(resp, res)
 }
 
-func (c Client) resource(resp *http.Response, res Resource) error {
+func (c Client) resource(resp *http.Response, res interface{}) error {
 	body, err := c.body(resp)
 	if err != nil {
 		return err
