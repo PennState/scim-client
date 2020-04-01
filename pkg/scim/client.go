@@ -297,25 +297,15 @@ func (c Client) getServerDiscoveryResources(ctx context.Context, typ ResourceTyp
 	return nil
 }
 
-func (c Client) getServerDiscoveryResource(ctx context.Context, r ServerDiscoveryResource) error {
-	log.Debugf("Type: %v", reflect.TypeOf(r))
-	path := c.cfg.ServiceURL + r.ResourceType().Endpoint
+func (c Client) getServerDiscoveryResource(ctx context.Context, res Resource) error {
+	log.Debugf("Type: %v", reflect.TypeOf(res))
+	path := c.cfg.ServiceURL + res.ResourceType().Endpoint
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/scim+json")
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
 
-	body, err := c.body(resp)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(body, r)
+	return c.resourceOrError(res, req)
 }
 
 //
