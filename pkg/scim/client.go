@@ -82,7 +82,7 @@ type Client struct {
 //
 
 func NewClient(http *http.Client, url string, opts ...ClientOpt) (*Client, error) {
-	var cfg clientCfg
+	cfg := clientCfg{}
 	cfg.ServiceURL = url
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91,7 +91,7 @@ func NewClient(http *http.Client, url string, opts ...ClientOpt) (*Client, error
 }
 
 func NewClientFromEnv(http *http.Client) (*Client, error) {
-	var cfg clientCfg
+	cfg := clientCfg{}
 	err := envconfig.Process(envPrefix, &cfg)
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func (c Client) QueryServer(ctx context.Context, sr SearchRequest) (ListResponse
 
 func (c Client) query(ctx context.Context, path string, sr SearchRequest) (ListResponse, error) {
 	log.Debug("Path: ", path)
-	var lr ListResponse
+	lr := ListResponse{}
 
 	// TODO: Remove this after SCIMple is fixed
 	if sr.SortOrder == NotSpecified {
@@ -231,19 +231,19 @@ func (c Client) ReplaceResource(ctx context.Context, res Resource) error {
 //
 
 func (c Client) GetResourceTypes(ctx context.Context) ([]ResourceType, error) {
-	var resourceTypes []ResourceType
+	resourceTypes := []ResourceType{}
 	err := c.getServerDiscoveryResources(ctx, ResourceTypeResourceType, resourceTypes)
 	return resourceTypes, err
 }
 
 func (c Client) GetSchemas(ctx context.Context) ([]Schema, error) {
-	var schemas []Schema
+	schemas := []Schema{}
 	err := c.getServerDiscoveryResources(ctx, SchemaResourceType, &schemas)
 	return schemas, err
 }
 
 func (c Client) GetServiceProviderConfig(ctx context.Context) (ServiceProviderConfig, error) {
-	var cfg ServiceProviderConfig
+	cfg := ServiceProviderConfig{}
 	err := c.getServerDiscoveryResource(ctx, &cfg)
 	return cfg, err
 }
