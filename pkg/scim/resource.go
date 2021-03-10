@@ -207,16 +207,22 @@ func (m *Meta) UnmarshalJSON(j []byte) error {
 		if key == "resourcetype" {
 			m.ResourceType = v
 		} else if key == "created" {
-			value := fixTimeZone(v)
-			t, err := time.Parse(time.RFC3339, value)
+			t, err := time.Parse(time.RFC3339, v)
+			if err != nil {
+				value := fixTimeZone(v)
+				t, err = time.Parse(time.RFC3339, value)
+			}
 
 			if err != nil {
 				return err
 			}
 			m.Created = t
 		} else if key == "lastmodified" {
-			value := fixTimeZone(v)
-			t, err := time.Parse(time.RFC3339, value)
+			t, err := time.Parse(time.RFC3339, v)
+			if err != nil {
+				value := fixTimeZone(v)
+				t, err = time.Parse(time.RFC3339, value)
+			}
 
 			if err != nil {
 				return err
