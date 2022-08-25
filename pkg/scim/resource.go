@@ -87,10 +87,12 @@ type StringMultivalued struct {
 	Value string `json:"value"` //The attribute's significant value, e.g., email address, phone	numbeca.
 }
 
+// Get value of Type field
 func (m Multivalued) GetType() string {
 	return m.Type
 }
 
+// Get value of Key field
 func (m Multivalued) GetKey() string {
 	return m.Key
 }
