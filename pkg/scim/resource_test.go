@@ -203,16 +203,6 @@ func TestExtractFirstMatchingKey(t *testing.T) {
 	assert.Equal(t, expectedEmail, email.Value, mismatchValueMask, typeEmail)
 }
 
-func TestExtractByKey(t *testing.T) {
-	expectedLength := 3
-	expectedStreet := "456 Any Street"
-	addresses := buildTestAddresses(t)
-	assert.Equal(t, expectedLength, len(addresses), mismatchCountMask, typeAddress)
-	address := ExtractByKey[Address](addresses, "2442")
-	assert.NotNil(t, address, errMaskFailedExtract, typeAddress)
-	assert.Equal(t, expectedStreet, address.StreetAddress, mismatchValueMask, typeAddress)
-}
-
 func TestResourceMarshaling(t *testing.T) {
 	assert := assert.New(t)
 

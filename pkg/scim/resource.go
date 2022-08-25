@@ -91,10 +91,6 @@ func (m Multivalued) GetType() string {
 	return m.Type
 }
 
-func (m Multivalued) GetKey() string {
-	return m.Key
-}
-
 func ExtractByType[T Typed](values []T, selector string) *T {
 	for _, v := range values {
 		if strings.EqualFold(v.GetType(), selector) {
@@ -109,15 +105,6 @@ func ExtractFirstMatchingType[T Typed](values []T, selectors ...string) *T {
 		value := ExtractByType(values, selector)
 		if value != nil {
 			return value
-		}
-	}
-	return nil
-}
-
-func ExtractByKey[T Keyed](values []T, key string) *T {
-	for _, v := range values {
-		if strings.EqualFold(v.GetKey(), key) {
-			return &v
 		}
 	}
 	return nil
