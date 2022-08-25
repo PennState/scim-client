@@ -95,6 +95,7 @@ func (m Multivalued) GetKey() string {
 	return m.Key
 }
 
+// Find first element in slice that contains has a type equal to provided selector
 func ExtractByType[T Typed](values []T, selector string) *T {
 	for _, v := range values {
 		if strings.EqualFold(v.GetType(), selector) {
@@ -104,6 +105,7 @@ func ExtractByType[T Typed](values []T, selector string) *T {
 	return nil
 }
 
+// Find first element in slice that contains has a key equal to provided key
 func ExtractByKey[T Keyed](values []T, key string) *T {
 	for _, v := range values {
 		if strings.EqualFold(v.GetKey(), key) {
@@ -113,6 +115,7 @@ func ExtractByKey[T Keyed](values []T, key string) *T {
 	return nil
 }
 
+// Find the first element in slice that a match to the provided selectors in the order they are presented
 func ExtractFirstMatchingType[T Typed](values []T, selectors ...string) *T {
 	for _, selector := range selectors {
 		value := ExtractByType(values, selector)
