@@ -26,6 +26,14 @@ func (we worthlessExtension) URN() string {
 	return "urn:worthless.extension"
 }
 
+const (
+	mismatchValueMask    string = "Expected and actual values for type %s do not match"
+	mismatchCountMask    string = "Expected and actual counts for type %s do not match"
+	errMaskFailedExtract string = "Did not extract value of type %s"
+	typeAddress          string = "Address"
+	typeEmail            string = "Email"
+)
+
 //
 //
 // Extension management tests
@@ -155,6 +163,58 @@ func TestUpdateExtension(t *testing.T) {
 
 //
 //
+// slice Extraction tests
+//
+//
+
+func TestExtractMultivalued(t *testing.T) {
+	expectedLength := 3
+	expectedStreet := "111 Building Name\n654 Test Ave"
+	addresses := buildTestAddresses(t)
+	assert.Equal(t, expectedLength, len(addresses), mismatchCountMask, typeAddress)
+
+	address := ExtractByType[Address](addresses, "office")
+	assert.NotNil(t, address, errMaskFailedExtract, typeAddress)
+	assert.Equal(t, expectedStreet, address.StreetAddress, mismatchValueMask, typeAddress)
+
+	expectedEmail := "abc123@gmail.com"
+	emails := buildTestEmails(t)
+	assert.Equal(t, expectedLength, len(emails), mismatchCountMask, typeEmail)
+
+	email := ExtractByType[Email](emails, "home")
+	assert.NotNil(t, address, errMaskFailedExtract, typeEmail)
+	assert.Equal(t, expectedEmail, email.Value, mismatchValueMask, typeEmail)
+}
+
+func TestExtractFirstMatchingKey(t *testing.T) {
+	expectedLength := 3
+	expectedStreet := "123 Any Street"
+	addresses := buildTestAddresses(t)
+	assert.Equal(t, expectedLength, len(addresses), mismatchCountMask, typeAddress)
+	address := ExtractFirstMatchingType[Address](addresses, "unknown", "invalid", "home", "office")
+	assert.NotNil(t, address, errMaskFailedExtract, typeAddress)
+	assert.Equal(t, expectedStreet, address.StreetAddress, mismatchValueMask, typeAddress)
+
+	expectedEmail := "cde345@office.org"
+	emails := buildTestEmails(t)
+	assert.Equal(t, expectedLength, len(emails), mismatchCountMask, typeEmail)
+	email := ExtractFirstMatchingType[Email](emails, "zdgvadg", "sdhgsdh", "office", "home")
+	assert.NotNil(t, address, errMaskFailedExtract, typeEmail)
+	assert.Equal(t, expectedEmail, email.Value, mismatchValueMask, typeEmail)
+}
+
+func TestExtractByKey(t *testing.T) {
+	expectedLength := 3
+	expectedStreet := "456 Any Street"
+	addresses := buildTestAddresses(t)
+	assert.Equal(t, expectedLength, len(addresses), mismatchCountMask, typeAddress)
+	address := ExtractByKey[Address](addresses, "2442")
+	assert.NotNil(t, address, errMaskFailedExtract, typeAddress)
+	assert.Equal(t, expectedStreet, address.StreetAddress, mismatchValueMask, typeAddress)
+}
+
+//
+//
 // Resource Marshaling tests
 //
 //
@@ -245,4 +305,74 @@ func TestBadResourceUnmarshaling(t *testing.T) {
 	var ca CommonAttributes
 	err := json.Unmarshal([]byte(badResourceJSON), &ca)
 	assert.NotNil(err)
+}
+
+func buildTestAddresses(t *testing.T) []Address {
+	const addressJson = `
+	[
+		{
+			"key": "196709",
+			"type": "HOME",
+			"primary": false,
+			"country": "US",
+			"locality": "State College",
+			"postalCode": "16801",
+			"region": "PA",
+			"streetAddress": "123 Any Street"
+		  },
+		  {
+			"key": "2442",
+			"type": "ALTERNATE",
+			"primary": false,
+			"country": "US",
+			"locality": "State College",
+			"postalCode": "16801",
+			"region": "PA",
+			"streetAddress": "456 Any Street"
+		  },
+		  {
+			"key": "194660",
+			"type": "OFFICE",
+			"primary": false,
+			"country": "US",
+			"locality": "State College",
+			"postalCode": "16803",
+			"region": "PA",
+			"streetAddress": "111 Building Name\n654 Test Ave"
+		  }
+	]`
+	addresses := make([]Address, 0)
+	err := json.Unmarshal([]byte(addressJson), &addresses)
+	if err != nil {
+		t.Fatalf("Error building addresses: %+v", err)
+	}
+	return addresses
+}
+
+func buildTestEmails(t *testing.T) []Email {
+	const emailJson = `
+	[
+	  {
+		"type": "HOME",
+		"value": "abc123@gmail.com",
+		"primary": false
+	  },
+	  {
+		"type": "ALTERNATE",
+		"value": "bcd234@alt.com",
+		"primary": true
+	  },
+	  {
+		"type": "OFFICE",
+		"value": "cde345@office.org",
+		"primary": false
+	  }
+	]
+	`
+	emails := make([]Email, 0)
+	err := json.Unmarshal([]byte(emailJson), &emails)
+	if err != nil {
+		t.Fatalf("Error building emails: %+v", err)
+	}
+	return emails
 }
