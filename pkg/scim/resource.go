@@ -19,11 +19,6 @@ type Typed interface {
 	GetType() string
 }
 
-// Structs that have a Type field
-type Keyed interface {
-	GetKey() string
-}
-
 // ServerDiscoveryResource identifies the implementing code as a SCIM
 // service discovery resource (Schemas, ServiceProviderConfig and
 // ResourceTypes).
