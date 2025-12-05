@@ -9,7 +9,7 @@ require (
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/onrik/logrus v0.4.1
-	github.com/sirupsen/logrus v1.4.2
-	github.com/stretchr/testify v1.5.1
+	github.com/sirupsen/logrus v1.8.3
+	github.com/stretchr/testify v1.7.0
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 )
